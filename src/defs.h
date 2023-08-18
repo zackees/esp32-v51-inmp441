@@ -22,10 +22,10 @@ using std::endl;
 #define TIME_PWM_CYCLE_MS  3 // Flickers at 1ms
 #define TIME_PWM_TRANSITION_MS 3  // 60 fps
 
-#define PIN_I2S_WS GPIO_NUM_7  // TODO change this pins
-#define PIN_IS2_SD GPIO_NUM_8  // TODO change this pins
-#define PIN_I2S_SCK GPIO_NUM_4  // TODO change this pins
-#define PIN_AUDIO_PWR GPIO_NUM_10  // TODO change this pins
+#define PIN_I2S_WS GPIO_NUM_7
+#define PIN_IS2_SD GPIO_NUM_8
+#define PIN_I2S_SCK GPIO_NUM_4
+#define PIN_AUDIO_PWR GPIO_NUM_10
 
 #define I2S_NUM I2S_NUM_0
 // #define IS2_AUDIO_BUFFER_LEN 1024 // max samples for i2s_read

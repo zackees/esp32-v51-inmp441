@@ -6,6 +6,17 @@ https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started
 
 The XIAO ESP32C3 can only be reliably flashed on MacOS. Windows will work a few times then stop working.
 
+# IS2 Pinout
+
+```cpp
+#define PIN_I2S_WS GPIO_NUM_7
+#define PIN_IS2_SD GPIO_NUM_8
+#define PIN_I2S_SCK GPIO_NUM_4
+#define PIN_AUDIO_PWR GPIO_NUM_10
+```
+
+L/R -> VDD
+
 # Install
 
   * Install VSCode

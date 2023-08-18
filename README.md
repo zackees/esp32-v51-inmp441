@@ -51,6 +51,27 @@ Prior to the battery test please solder on a lipo pouch cell >= 150 mA to the ba
     * Desolder battery
     * If not failure then SUCCESS
 
+# Low power test
+
+This is designed for espressif.
+
+This test shows how the IS2 doesn't wake from sleep.
+
+  * During the test, hold down the user button for a number of seconds
+  * Eventually you hit the low power test, keep holding the button
+  * Low power will enter then the microphone will be checked
+  * Example output (see below)
+
+#### Example output
+
+```
+Now doing a microphone check. In a broken state the IS2 will read high values (>70 dB) before settling down to ambient noise levels.
+dB: 87.0328
+dB: 87.0328
+dB: 86.664
+...
+```
+
 # Owner's design:
 
 ![image](https://github.com/zackees/xiao-inmp441-test/assets/6856673/7017fa5a-ff1d-4d03-8c54-105cfbb52e59)

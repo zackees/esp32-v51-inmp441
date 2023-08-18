@@ -32,14 +32,14 @@
 #include "audio.h"
 #include "task.h"
 #include "util.h"
-#include "buffer.hpp"
 #include "led_driver.h"
 #include "button.h"
 #include "low_power.h"
 
+#define MICORPHONE_CHECK_TIME 300
 #define N_AUDIO_dB_HISTORY 32
 // #define ENABLE_LOW_POWER_MODE 1
-Buffer<float> g_dB_buffer; // Buffer of
+
 
 void led_sync_animation_power_ramp()
 {
@@ -76,7 +76,6 @@ void setup()
   cout << "LED initialized\n";
   audio_init();
   cout << "Audio initialized\n";
-  g_dB_buffer.init(N_AUDIO_dB_HISTORY);
   cout << "Sound history buffer initialized\n";
   // Startup led sequence.
   led_sync_animation_power_ramp();
@@ -85,16 +84,33 @@ void setup()
   cout << "Initialized\n";
 }
 
-
-// the loop function runs over and over again forever
-void loop()
-{
-  // test 1
-  led_sync_animation_power_ramp();
+void low_power_test() {
+  cout << "low power test\n";
+  uint32_t start_button_press_time = millis();
+  uint32_t timetout = 1000ul;
   if (button_is_pressed())
   {
-    led_write(255);
+    cout << "Button is pressed, waiting one second to test again\n";
+    delay(1000);
+    if (button_is_pressed()) {
+      cout << "Doing a light sleep then checking microphone" << endl;
+      light_sleep(1);
+      uint32_t start_time_mic_check = millis();
+      while (true) {
+        uint32_t diff = millis() - start_time_mic_check;
+        if (diff > MICORPHONE_CHECK_TIME) {
+          break;
+        }
+        audio_state_t audio_state = audio_update();
+        // print the dB of the audio
+        cout << "dB: " << audio_state.dB << endl;
+      }
+    }
   }
+}
+
+void audio_test() {
+  cout << "audio test\n";
   uint32_t expired_time = millis() + 5000ul;
   while (millis() < expired_time)
   {
@@ -106,24 +122,17 @@ void loop()
       led_write(0);
     }
   }
-  uint32_t start_button_press_time = millis();
-  uint32_t timetout = 1000ul;
+}
+
+// the loop function runs over and over again forever
+void loop()
+{
+  // test 1
+  led_sync_animation_power_ramp();
   if (button_is_pressed())
   {
-    delay(1000);
-    if (button_is_pressed()) {
-      cout << "Doing a light sleep then checking microphone" << endl;
-      light_sleep(1);
-      uint32_t start_time_mic_check = millis();
-      while (true) {
-        uint32_t diff = millis() - start_time_mic_check;
-        if (diff > 1000) {
-          break;
-        }
-        audio_state_t audio_state = audio_update();
-        // print the dB of the audio
-        cout << "dB: " << audio_state.dB << endl;
-      }
-    }
+    led_write(255);
   }
+  audio_test();
+  low_power_test();
 }

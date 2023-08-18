@@ -38,7 +38,6 @@
 
 #define MICORPHONE_CHECK_TIME 300
 #define N_AUDIO_dB_HISTORY 32
-// #define ENABLE_LOW_POWER_MODE 1
 
 
 void led_sync_animation_power_ramp()

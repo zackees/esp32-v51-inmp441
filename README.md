@@ -68,6 +68,7 @@ This is designed for espressif.
 
 This test shows how the IS2 doesn't wake from sleep.
 
+  * Activate the VSCode serial monitor to the ESP32 to check std::cout output.
   * During the test, hold down the user button for a number of seconds
   * Eventually you hit the low power test, keep holding the button
   * Low power will enter then the microphone will be checked

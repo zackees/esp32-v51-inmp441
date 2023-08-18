@@ -2,6 +2,10 @@
 
 https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started
 
+# Important
+
+The XIAO ESP32C3 can only be reliably flashed on MacOS. Windows will work a few times then stop working.
+
 # Install
 
   * Install VSCode

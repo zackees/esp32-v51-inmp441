@@ -23,7 +23,10 @@ https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started
 
   Prior to test please SOLDER ON AN LED to EXTERNAL LED on board. Add a 120 ohm resistor in series with the LED.
 
-[![Demo CountPages alpha](demo.jpg)](demo.mp4)
+
+https://github.com/zackees/xiao-inmp441-test/assets/6856673/368250d2-1b81-4c72-8af0-213dab47555c
+
+
 
   * Software Test
     * Fade on-off blink test (1 second): Led should fade on/off

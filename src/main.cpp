@@ -35,6 +35,7 @@
 #include "buffer.hpp"
 #include "led_driver.h"
 #include "button.h"
+#include "low_power.h"
 
 #define N_AUDIO_dB_HISTORY 32
 // #define ENABLE_LOW_POWER_MODE 1
@@ -98,9 +99,29 @@ void loop()
   while (millis() < expired_time)
   {
     audio_state_t audio_state = audio_update();
-    if (audio_state.db > 60.0f || button_is_pressed())
+    if (audio_state.dB > 60.0f || button_is_pressed())
     {
       led_write(255);
+    }
+  }
+  uint32_t start_button_press_time = millis();
+  uint32_t timetout = 1000ul;
+  if (button_is_pressed())
+  {
+    delay(1000);
+    if (button_is_pressed()) {
+      cout << "Doing a light sleep then checking microphone" << endl;
+      light_sleep(1);
+      uint32_t start_time_mic_check = millis();
+      while (true) {
+        uint32_t diff = millis() - start_time_mic_check;
+        if (diff > 1000) {
+          break;
+        }
+        audio_state_t audio_state = audio_update();
+        // print the dB of the audio
+        cout << "dB: " << audio_state.dB << endl;
+      }
     }
   }
 }

@@ -61,17 +61,6 @@ Prior to the battery test please solder on a lipo pouch cell >= 150 mA to the ba
   * Datasheet
     * https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf
 
-  * I2S
-    * According to the datasheet, any pin can be used for I2S
-    * Pins (All pins as marked on the board) MIC -> XIAO:
-      * WS -> D1
-      * L/R -> VDD
-      * SD -> D0
-      * SCK -> D2
-      * VDD -> VDD
-      * GND -> D3
-
-
 # Pinouts
 
   * XIAO:

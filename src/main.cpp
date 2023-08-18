@@ -39,15 +39,17 @@
 #define MICORPHONE_CHECK_TIME 300
 #define N_AUDIO_dB_HISTORY 32
 
-
-void led_sync_animation_power_ramp()
+void led_ramp_test()
 {
+  cout << "LED ramp test\n";
   for (int i = 0; i <= 255; i += 1)
   {
     if (button_is_pressed())
     {
       led_write(255);
-    } else {
+    }
+    else
+    {
       led_write(i);
     }
     delay(3);
@@ -57,7 +59,9 @@ void led_sync_animation_power_ramp()
     if (button_is_pressed())
     {
       led_write(255);
-    } else {
+    }
+    else
+    {
       led_write(i);
     }
     delay(3);
@@ -77,13 +81,47 @@ void setup()
   cout << "Audio initialized\n";
   cout << "Sound history buffer initialized\n";
   // Startup led sequence.
-  led_sync_animation_power_ramp();
+  led_ramp_test();
   cout << "LED sync animation power ramp\n";
   // set alarm to fire every 0.1 second
   cout << "Initialized\n";
 }
 
-void low_power_test() {
+void button_test()
+{
+  cout << "button test\n";
+  if (button_is_pressed())
+  {
+    led_write(255);
+  }
+}
+
+void audio_test()
+{
+  cout << "audio test\n";
+  uint32_t expired_time = millis() + 5000ul;
+  uint32_t last_audio_update_time = 0;
+  while (millis() < expired_time)
+  {
+    audio_state_t audio_state = audio_update();
+    bool has_update = audio_state.updated_at != last_audio_update_time;
+    if (!has_update)
+    {
+      continue;
+    }
+    if (audio_state.dB > 70.0f || button_is_pressed())
+    {
+      led_write(255);
+    }
+    else
+    {
+      led_write(0);
+    }
+  }
+}
+
+void low_power_test()
+{
   cout << "low power test\n";
   uint32_t start_button_press_time = millis();
   uint32_t timetout = 1000ul;
@@ -91,47 +129,38 @@ void low_power_test() {
   {
     cout << "Button is pressed, waiting one second to test again\n";
     delay(1000);
-    if (button_is_pressed()) {
+    if (button_is_pressed())
+    {
       cout << "Doing a light sleep then checking microphone" << endl;
       light_sleep(1);
+      cout << "Now doing a microphone check. In a broken state the IS2 will read high values (>70 dB) before settling down to ambient noise levels.\n";
       uint32_t start_time_mic_check = millis();
-      while (true) {
+      uint32_t last_audio_update_time = 0;
+      while (true)
+      {
         uint32_t diff = millis() - start_time_mic_check;
-        if (diff > MICORPHONE_CHECK_TIME) {
+        if (diff > MICORPHONE_CHECK_TIME)
+        {
           break;
         }
         audio_state_t audio_state = audio_update();
+        bool has_update = audio_state.updated_at != last_audio_update_time;
         // print the dB of the audio
         cout << "dB: " << audio_state.dB << endl;
       }
     }
   }
-}
-
-void audio_test() {
-  cout << "audio test\n";
-  uint32_t expired_time = millis() + 5000ul;
-  while (millis() < expired_time)
+  else
   {
-    audio_state_t audio_state = audio_update();
-    if (audio_state.dB > 70.0f || button_is_pressed())
-    {
-      led_write(255);
-    } else {
-      led_write(0);
-    }
+    cout << "Button is not pressed, exiting low power test\n";
   }
 }
 
 // the loop function runs over and over again forever
 void loop()
 {
-  // test 1
-  led_sync_animation_power_ramp();
-  if (button_is_pressed())
-  {
-    led_write(255);
-  }
+  led_ramp_test();
+  button_test();
   audio_test();
   low_power_test();
 }

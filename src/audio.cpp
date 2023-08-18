@@ -18,8 +18,6 @@
 
 using namespace std;
 
-#define ENABLE_AUDIO_TASK 0
-
 #define AUDIO_TASK_SAMPLING_PRIORITY 7
 
 #define AUDIO_BUFFER_SAMPLES (AUDIO_RECORDING_SECONDS * AUDIO_SAMPLE_RATE * AUDIO_CHANNELS)
@@ -183,15 +181,6 @@ void audio_init(bool wait_for_power_on)
   {
     delay_task_ms(POWER_ON_TIME_MS); // Wait for the microphone to power on.
   }
-
-  // start a task to read the audio samples using psram
-  // TaskCreatePsramPinnedToCore(
-  //    audio_task, "audio_task", 4096, NULL, AUDIO_TASK_SAMPLING_PRIORITY, NULL, 0);
-
-#if ENABLE_AUDIO_TASK
-  xTaskCreatePinnedToCore(
-      audio_task, "audio_task", 4096, NULL, AUDIO_TASK_SAMPLING_PRIORITY, NULL, 0);
-#endif
 }
 
 // UNTESTED
@@ -207,12 +196,6 @@ audio_state_t audio_update()
   audio_buffer_t buffer = {0};
   uint32_t start_time = millis();
   update_audio_samples(&buffer);
-#if ENABLE_AUDIO_TASK
-  for (int i = 0; i < 3; i++)
-  {
-    vPortYield();
-  }
-#endif
   audio_state_t state = audio_state_t(audio_loudness_dB(), s_loudness_updated.load(), buffer);
   return state;
 }
@@ -261,6 +244,7 @@ void audio_enter_light_sleep()
   i2s_audio_shutdown();
   // i2s_zero_dma_buffer(I2S_NUM_0);
   digitalWrite(PIN_AUDIO_PWR, HIGH);
+  // Do freezing the IS2 pins help?
   gpio_hold_en(PIN_I2S_WS);
   gpio_hold_en(PIN_IS2_SD);
   gpio_hold_en(PIN_I2S_SCK);
@@ -272,10 +256,11 @@ void audio_exit_light_sleep()
   gpio_hold_dis(PIN_I2S_WS);
   gpio_hold_dis(PIN_IS2_SD);
   gpio_hold_dis(PIN_I2S_SCK);
-  // gpio_hold_dis(PIN_AUDIO_PWR);
-  delay(160);  // It takes a long time for the microphone IS2 to become ready.
+  gpio_hold_dis(PIN_AUDIO_PWR);
+  digitalWrite(PIN_AUDIO_PWR, HIGH);  // Probably not needed.
   // i2s_start(I2S_NUM_0);
   i2s_audio_init();
+  // Graveyard of failed attempts to fix IS2 issue.
   // audio_sample_t buffer[IS2_AUDIO_BUFFER_LEN] = {0};
   // uint32_t future_time = millis() + 180;
   // while (millis() < future_time) {

@@ -15,9 +15,9 @@ typedef audio_sample_t audio_buffer_t[IS2_AUDIO_BUFFER_LEN];
 
 struct audio_state_t {
   float dB = 0.f;
-  uint32_t updated = 0;
+  uint32_t updated_at = 0;
   audio_buffer_t samples = {0};
-  audio_state_t(float _dB, uint32_t _updated, const audio_buffer_t& samples) : dB(_dB), updated(_updated) {
+  audio_state_t(float _dB, uint32_t _updated_at, const audio_buffer_t& samples) : dB(_dB), updated_at(_updated_at) {
     memcpy(this->samples, samples, sizeof(this->samples));
   }
 };

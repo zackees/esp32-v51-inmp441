@@ -23,6 +23,8 @@ https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started
 
   Prior to test please SOLDER ON AN LED to EXTERNAL LED on board. Add a 120 ohm resistor in series with the LED.
 
+[![Demo CountPages alpha](demo.jpg)](demo.mp4)
+
   * Software Test
     * Fade on-off blink test (1 second): Led should fade on/off
       * If LED does not come on then FAIL

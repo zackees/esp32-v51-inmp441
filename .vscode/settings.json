@@ -1,0 +1,32 @@
+{
+  "python.autoComplete.extraPaths": [
+    "."
+  ],
+  "python.defaultInterpreterPath": "venv/bin/python",
+  "terminal.integrated.profiles.windows": {
+    "bash": {
+      "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+      "args": []
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "bash",
+  "python.linting.pylintEnabled": true,
+  "files.eol": "\n",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": false,
+  "cmake.configureOnOpen": false,
+  "files.associations": {
+    "atomic": "cpp",
+    "iosfwd": "cpp",
+    "iostream": "cpp",
+    "chrono": "cpp",
+    "cmath": "cpp",
+    "ostream": "cpp",
+    "_kiss_fft_guts.h": "c"
+  },
+  "python.analysis.extraPaths": [
+    "."
+  ]
+}

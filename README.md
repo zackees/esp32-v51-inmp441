@@ -1,5 +1,3 @@
-# SongStone
-
 # Guides
 
 https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started

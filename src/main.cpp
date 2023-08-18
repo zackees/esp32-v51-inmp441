@@ -99,9 +99,11 @@ void loop()
   while (millis() < expired_time)
   {
     audio_state_t audio_state = audio_update();
-    if (audio_state.dB > 60.0f || button_is_pressed())
+    if (audio_state.dB > 70.0f || button_is_pressed())
     {
       led_write(255);
+    } else {
+      led_write(0);
     }
   }
   uint32_t start_button_press_time = millis();

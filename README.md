@@ -43,6 +43,11 @@ Prior to the battery test please solder on a lipo pouch cell >= 150 mA to the ba
     * Desolder battery
     * If not failure then SUCCESS
 
+# Owner's design:
+
+![image](https://github.com/zackees/xiao-inmp441-test/assets/6856673/7017fa5a-ff1d-4d03-8c54-105cfbb52e59)
+
+
 # XIAO Pins
 
   * Datasheet

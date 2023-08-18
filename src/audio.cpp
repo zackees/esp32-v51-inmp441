@@ -273,7 +273,7 @@ void audio_exit_light_sleep()
   gpio_hold_dis(PIN_IS2_SD);
   gpio_hold_dis(PIN_I2S_SCK);
   // gpio_hold_dis(PIN_AUDIO_PWR);
-  delay(160);
+  delay(160);  // It takes a long time for the microphone IS2 to become ready.
   // i2s_start(I2S_NUM_0);
   i2s_audio_init();
   // audio_sample_t buffer[IS2_AUDIO_BUFFER_LEN] = {0};

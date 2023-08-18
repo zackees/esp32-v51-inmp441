@@ -18,7 +18,8 @@ The XIAO ESP32C3 can only be reliably flashed on MacOS. Windows will work a few 
   * Connect to XIAO board with USBC cable.
     * Make sure the cable is designed for data
     * Click build/upload in the platform io toolpanel
-      * (show picture)
+      * ![image](https://github.com/zackees/xiao-inmp441-test/assets/6856673/13bed300-5c01-4837-ba01-008b39cfe71e)
+
   * The test software should now be installed and the board should be running a test program
 
 # Test routine

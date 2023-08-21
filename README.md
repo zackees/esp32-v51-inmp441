@@ -20,7 +20,7 @@ L/R -> VDD
 # Install
 
   * Install VSCode
-    * with the platform io plugin
+    * Install the platform io plugin
   * `git clone https://github.com/zackees/xiao-inmp441-test`
   * Use VSCode to open `xiao-inmp441-test`
 

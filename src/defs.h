@@ -35,6 +35,7 @@ using std::endl;
 #define AUDIO_CHANNELS 1 // Not tested with 2 channels
 #define AUDIO_DMA_BUFFER_COUNT 3
 #define AUDIO_RECORDING_SECONDS 1
+#define PIN_AUDIO_EN GPIO_NUM_21
 
 #define LIGHT_SLEEP_TIME_uS uint32_t(1000 * 100) // 100 ms.
 #define TIME_TURNOFF 1500 // 1 second

@@ -109,6 +109,7 @@ void audio_test()
     {
       continue;
     }
+    cout << "db: " << audio_state.dB << endl;
     if (audio_state.dB > 70.0f || button_is_pressed())
     {
       led_write(255);
@@ -131,8 +132,19 @@ void low_power_test()
     delay(1000);
     if (button_is_pressed())
     {
+      while(button_is_pressed()) {
+        ;
+      }
+      delay(500);
       cout << "Doing a light sleep then checking microphone" << endl;
-      light_sleep(1);
+      while (true) {
+        light_sleep(2000);
+        if (button_is_pressed()) {
+          cout << "Button is pressed, exiting low power test\n";
+          break;
+        }
+      }
+
       cout << "Now doing a microphone check. In a broken state the IS2 will read high values (>70 dB) before settling down to ambient noise levels.\n";
       uint32_t start_time_mic_check = millis();
       uint32_t last_audio_update_time = 0;

@@ -36,3 +36,4 @@
 .vscode/launch.json
 **/__pycache__
 esp-idf/**
+build/

@@ -3,13 +3,16 @@
     "."
   ],
   "python.defaultInterpreterPath": "venv/bin/python",
+  "terminal.integrated.defaultProfile.windows": "cmd.exe",
   "terminal.integrated.profiles.windows": {
-    "bash": {
-      "path": "C:\\Program Files\\Git\\bin\\bash.exe",
-      "args": []
-    }
+      "bash": {
+          "path": "C:\\Program Files\\Git\\bin\\bash.exe"
+      },
+      "cmd.exe": {
+          "path": "C:\\Windows\\System32\\cmd.exe",
+      }
   },
-  "terminal.integrated.defaultProfile.windows": "bash",
+  "terminal.integrated.defaultProfile.windows": "cmd.exe",
   "python.linting.pylintEnabled": true,
   "files.eol": "\n",
   "editor.tabSize": 2,

@@ -128,26 +128,26 @@ void low_power_test()
   if (button_is_pressed())
   {
     cout << "Button is pressed, waiting one second to test again\n";
-    delay(1000);
-    if (button_is_pressed())
+    while(button_is_pressed()) {
+      delay(100);
+    }
+
+    cout << "Doing a light sleep then checking microphone" << endl;
+    light_sleep(1);
+    cout << "Now doing a microphone check. In a broken state the IS2 will read high values (>70 dB) before settling down to ambient noise levels.\n";
+    uint32_t start_time_mic_check = millis();
+    uint32_t last_audio_update_time = 0;
+    while (true)
     {
-      cout << "Doing a light sleep then checking microphone" << endl;
-      light_sleep(1);
-      cout << "Now doing a microphone check. In a broken state the IS2 will read high values (>70 dB) before settling down to ambient noise levels.\n";
-      uint32_t start_time_mic_check = millis();
-      uint32_t last_audio_update_time = 0;
-      while (true)
+      uint32_t diff = millis() - start_time_mic_check;
+      if (diff > MICORPHONE_CHECK_TIME)
       {
-        uint32_t diff = millis() - start_time_mic_check;
-        if (diff > MICORPHONE_CHECK_TIME)
-        {
-          break;
-        }
-        audio_state_t audio_state = audio_update();
-        bool has_update = audio_state.updated_at != last_audio_update_time;
-        // print the dB of the audio
-        cout << "dB: " << audio_state.dB << endl;
+        break;
       }
+      audio_state_t audio_state = audio_update();
+      bool has_update = audio_state.updated_at != last_audio_update_time;
+      // print the dB of the audio
+      cout << "dB: " << audio_state.dB << endl;
     }
   }
   else
@@ -159,8 +159,8 @@ void low_power_test()
 // the loop function runs over and over again forever
 void loop()
 {
-  led_ramp_test();
-  button_test();
-  audio_test();
+  //led_ramp_test();
+  //button_test();
+  //audio_test();
   low_power_test();
 }

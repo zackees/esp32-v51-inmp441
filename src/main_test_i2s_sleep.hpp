@@ -65,7 +65,7 @@ void i2s_sleep_test_microphone_distortion() {
     if (audio_state.updated_at > last_update_time) {
       last_update_time = audio_state.updated_at;
       uint32_t diff = millis() - start_time;
-      Serial.printf("%u: dB: %f\n", diff, audio_state.dB);
+      Serial.printf("%u: dB: %d\n", diff, int(audio_state.dB));
     }
   }
   Serial.printf("Now entering light sleep\n");
@@ -79,7 +79,7 @@ void i2s_sleep_test_microphone_distortion() {
     if (audio_state.updated_at > last_update_time) {
       last_update_time = audio_state.updated_at;
       uint32_t diff = millis() - start_time;
-      Serial.printf("%u: dB: %f\n", diff, audio_state.dB);
+      Serial.printf("%u: dB: %d\n", diff, int(audio_state.dB));
     }
   }
 }

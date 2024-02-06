@@ -58,7 +58,7 @@ uint8_t led_driver_update(uint32_t duration_ms) {
     } else {
       float maybe_next_vol = s_prev_vol * std::exp(LED_ATTACK_RATE * time);
       if (maybe_next_vol > s_prev_vol && maybe_next_vol > 0.01f) {  // Need a boost to get over the hump.
-        next_vol = clamp(vol, s_prev_vol, maybe_next_vol);
+        next_vol = std::clamp(vol, s_prev_vol, maybe_next_vol);
       } else {
         next_vol = vol;
       }

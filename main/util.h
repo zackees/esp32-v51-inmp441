@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include <cmath>
+// include stl_algo.h
+#include <algorithm>
 
 inline float linear_interpolation(float start_value, float end_value, float t) {
     return start_value + (end_value - start_value) * t;
@@ -12,8 +14,9 @@ inline float mapf(float x, float in_min, float in_max, float out_min, float out_
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
+
 template <typename T>
-inline T clamp(T x, T min, T max) {
+inline T _clamp(T x, T min, T max) {
   if (x < min) {
     return min;
   } else if (x > max) {
@@ -23,8 +26,9 @@ inline T clamp(T x, T min, T max) {
   }
 }
 
+
 inline float mapf_clamped(float x, float in_min, float in_max, float out_min, float out_max) {
-  return clamp<float>(mapf(x, in_min, in_max, out_min, out_max), out_min, out_max);
+  return _clamp<float>(mapf(x, in_min, in_max, out_min, out_max), out_min, out_max);
 }
 
 // represents A = pe^(r*t) function.

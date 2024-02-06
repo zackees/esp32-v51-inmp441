@@ -245,18 +245,18 @@ void audio_enter_light_sleep()
   // i2s_zero_dma_buffer(I2S_NUM_0);
   digitalWrite(PIN_AUDIO_PWR, HIGH);
   // Do freezing the IS2 pins help?
-  gpio_hold_en(PIN_I2S_WS);
-  gpio_hold_en(PIN_IS2_SD);
-  gpio_hold_en(PIN_I2S_SCK);
-  gpio_hold_en(PIN_AUDIO_PWR);
+  //gpio_hold_en(PIN_I2S_WS);
+  //gpio_hold_en(PIN_IS2_SD);
+  //gpio_hold_en(PIN_I2S_SCK);
+  //gpio_hold_en(PIN_AUDIO_PWR);
 }
 
 void audio_exit_light_sleep()
 {
-  gpio_hold_dis(PIN_I2S_WS);
-  gpio_hold_dis(PIN_IS2_SD);
-  gpio_hold_dis(PIN_I2S_SCK);
-  gpio_hold_dis(PIN_AUDIO_PWR);
+  //gpio_hold_dis(PIN_I2S_WS);
+  //gpio_hold_dis(PIN_IS2_SD);
+  //gpio_hold_dis(PIN_I2S_SCK);
+  //gpio_hold_dis(PIN_AUDIO_PWR);
   digitalWrite(PIN_AUDIO_PWR, HIGH);  // Probably not needed.
   // i2s_start(I2S_NUM_0);
   i2s_audio_init();

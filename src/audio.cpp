@@ -4,7 +4,6 @@
 #include "defs.h"
 #include <Arduino.h>
 #include <stdint.h>
-#include <driver/i2s.h>
 #include "ringbuffer.hpp"
 #include "alloc.h"
 #include "buffer.hpp"
@@ -15,6 +14,8 @@
 #include <atomic>
 
 #include "alloc.h"
+
+#include "i2s_device.h"
 
 using namespace std;
 
@@ -37,39 +38,6 @@ namespace
   std::atomic<uint32_t> s_loudness_updated;
   int garbage_buffer_count = 0;
 
-  const i2s_config_t i2s_config = {
-      .mode = i2s_mode_t(I2S_MODE_MASTER | I2S_MODE_RX),
-      .sample_rate = AUDIO_SAMPLE_RATE,
-      .bits_per_sample = i2s_bits_per_sample_t(AUDIO_BIT_RESOLUTION),
-      .channel_format = i2s_channel_fmt_t(I2S_CHANNEL_FMT_ONLY_RIGHT),
-      .communication_format = i2s_comm_format_t(I2S_COMM_FORMAT_STAND_I2S),
-      .intr_alloc_flags = 0,
-      .dma_buf_count = AUDIO_DMA_BUFFER_COUNT,
-      .dma_buf_len = IS2_AUDIO_BUFFER_LEN,
-      //.use_apll = true
-      // .tx_desc_auto_clear ?
-  };
-
-  const i2s_pin_config_t pin_config = {
-      .bck_io_num = PIN_I2S_SCK,
-      .ws_io_num = PIN_I2S_WS,
-      .data_out_num = I2S_PIN_NO_CHANGE,
-      .data_in_num = PIN_IS2_SD};
-
-  void i2s_audio_init()
-  {
-
-    i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
-    i2s_set_pin(I2S_NUM, &pin_config);
-    i2s_zero_dma_buffer(I2S_NUM_0);
-    // i2s_start(I2S_NUM_0);
-  }
-
-  void i2s_audio_shutdown()
-  {
-    // i2s_stop(I2S_NUM_0);
-    i2s_driver_uninstall(I2S_NUM_0);
-  }
 
   double audio_loudness_to_dB(double rms_loudness)
   {
@@ -107,24 +75,6 @@ namespace
     return static_cast<float>(std::sqrt(mean_square));
   }
 
-  size_t read_raw_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
-  {
-    size_t bytes_read = 0;
-    i2s_event_t event;
-
-    uint32_t current_time = millis();
-    esp_err_t result = i2s_read(I2S_NUM_0, buffer, sizeof(buffer), &bytes_read, 0);
-    if (result == ESP_OK)
-    {
-      if (bytes_read > 0)
-      {
-        // cout << "Bytes read: " << bytes_read << endl;
-        const size_t count = bytes_read / sizeof(audio_sample_t);
-        return count;
-      }
-    }
-    return 0;
-  }
 
   bool update_audio_samples(audio_buffer_t* dst)
   {
@@ -132,7 +82,7 @@ namespace
     bool updated = false;
     while (true)
     {
-      size_t samples_read = read_raw_samples(*dst);
+      size_t samples_read = i2s_read_raw_samples(*dst);
       if (samples_read <= 0)
       {
         break;
@@ -215,7 +165,7 @@ void audio_loudness_test()
     // This is a test to see how loud the audio is.
     // It's not used in the final product.
     audio_sample_t buffer[IS2_AUDIO_BUFFER_LEN] = {0};
-    size_t samples_read = read_raw_samples(buffer);
+    size_t samples_read = i2s_read_raw_samples(buffer);
     if (samples_read > 0)
     {
       double rms_loudness = calc_rms_loudness(buffer, samples_read);

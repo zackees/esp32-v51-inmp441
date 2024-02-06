@@ -156,11 +156,40 @@ void low_power_test()
   }
 }
 
+
+void legacy_test() {
+  led_ramp_test();
+  button_test();
+  audio_test();
+  low_power_test();
+}
+
+void new_test() {
+  uint32_t end_time = millis() + 1000ul;
+  uint32_t last_update_time = 0;
+  while (millis() < end_time) {
+    audio_state_t audio_state = audio_update();
+    if (audio_state.updated_at > last_update_time) {
+      last_update_time = audio_state.updated_at;
+      Serial.printf("dB: %f\n", audio_state.dB);
+    }
+  }
+  Serial.printf("Now entering light sleep\n");
+  light_sleep(1);
+  Serial.printf("Exited light sleep, now outputting dB sound levels for one second.\n");
+  end_time = millis() + 1000ul;
+  last_update_time = 0;
+  while (millis() < end_time) {
+    audio_state_t audio_state = audio_update();
+    if (audio_state.updated_at > last_update_time) {
+      last_update_time = audio_state.updated_at;
+      Serial.printf("dB: %f\n", audio_state.dB);
+    }
+  }
+}
+
 // the loop function runs over and over again forever
 void loop()
 {
-  //led_ramp_test();
-  //button_test();
-  //audio_test();
-  low_power_test();
+  legacy_test();
 }

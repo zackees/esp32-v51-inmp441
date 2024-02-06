@@ -116,6 +116,8 @@ namespace
 
 void i2s_audio_init()
 {
+  pinMode(PIN_AUDIO_PWR, OUTPUT);
+  digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone.
   init_i2s_pins();
 }
 

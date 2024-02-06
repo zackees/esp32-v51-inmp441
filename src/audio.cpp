@@ -124,8 +124,6 @@ void audio_init(bool wait_for_power_on)
     return;
   }
   s_audio_initialized = true;
-  pinMode(PIN_AUDIO_PWR, OUTPUT);
-  digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone.
   i2s_audio_init();
   if (wait_for_power_on)
   {

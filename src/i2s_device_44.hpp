@@ -64,6 +64,8 @@ namespace
 void i2s_audio_init()
 {
 
+  pinMode(PIN_AUDIO_PWR, OUTPUT);
+  digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone.
   i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
   i2s_set_pin(I2S_NUM, &pin_config);
   i2s_zero_dma_buffer(I2S_NUM_0);

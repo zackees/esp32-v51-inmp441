@@ -29,10 +29,9 @@
 #include "main.h"
 #include "led.h"
 #include "defs.h"
-#include "audio.h"
+#include "i2s_device.h"
 #include "task.h"
 #include "util.h"
-#include "led_driver.h"
 #include "button.h"
 #include "low_power.h"
 
@@ -46,10 +45,17 @@ void setup()
   Serial.begin(115200);
   button_setup();
   led_setup();
-  audio_init();
+  i2s_audio_init();
 
   // set alarm to fire every 0.1 second
   cout << "Initialized\n";
+}
+
+void my_light_sleep(uint32_t duration_ms) {
+  esp_sleep_enable_timer_wakeup(duration_ms * 1000);
+  i2s_audio_shutdown();
+  esp_light_sleep_start();
+  i2s_audio_init();
 }
 
 
@@ -58,28 +64,36 @@ void i2s_sleep_test_microphone_distortion() {
   // the microphone for 1 second.
   Serial.printf("Playing test sound for one second, then entering light sleep for one second, then outputting dB sound levels for one second.\n");
   uint32_t end_time = millis() + 1000ul;
-  uint32_t last_update_time = 0;
   uint32_t start_time = millis();
   while (millis() < end_time) {
-    audio_state_t audio_state = audio_update();
-    if (audio_state.updated_at > last_update_time) {
-      last_update_time = audio_state.updated_at;
+    audio_buffer_t buffer = {0};
+    size_t bytes_read = i2s_read_raw_samples(buffer);
+    if (bytes_read > 0) {
       uint32_t diff = millis() - start_time;
-      Serial.printf("%u: dB: %d\n", diff, int(audio_state.dB));
+      audio_sample_t* begin = &buffer[0];
+      audio_sample_t* end = &buffer[bytes_read];
+      int16_t* low = std::min_element(begin, end);
+      int16_t* high = std::max_element(begin, end);
+      int16_t vol = *high - *low;
+      Serial.printf("%u: dB: %d\n", diff, vol);
     }
   }
   Serial.printf("Now entering light sleep\n");
-  light_sleep(1);
+  my_light_sleep(1);
   Serial.printf("Exited light sleep, now outputting dB sound levels for one second.\n");
   end_time = millis() + 1000ul;
-  last_update_time = 0;
   start_time = millis();
   while (millis() < end_time) {
-    audio_state_t audio_state = audio_update();
-    if (audio_state.updated_at > last_update_time) {
-      last_update_time = audio_state.updated_at;
+    audio_buffer_t buffer = {0};
+    size_t bytes_read = i2s_read_raw_samples(buffer);
+    if (bytes_read > 0) {
       uint32_t diff = millis() - start_time;
-      Serial.printf("%u: dB: %d\n", diff, int(audio_state.dB));
+      audio_sample_t* begin = &buffer[0];
+      audio_sample_t* end = &buffer[bytes_read];
+      int16_t* low = std::min_element(begin, end);
+      int16_t* high = std::max_element(begin, end);
+      int16_t vol = *high - *low;
+      Serial.printf("%u: dB: %d\n", diff, vol);
     }
   }
 }

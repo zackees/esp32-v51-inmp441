@@ -27,7 +27,16 @@
     "chrono": "cpp",
     "cmath": "cpp",
     "ostream": "cpp",
-    "_kiss_fft_guts.h": "c"
+    "_kiss_fft_guts.h": "c",
+    "array": "cpp",
+    "deque": "cpp",
+    "string": "cpp",
+    "unordered_map": "cpp",
+    "unordered_set": "cpp",
+    "vector": "cpp",
+    "string_view": "cpp",
+    "initializer_list": "cpp",
+    "span": "cpp"
   },
   "python.analysis.extraPaths": [
     "."

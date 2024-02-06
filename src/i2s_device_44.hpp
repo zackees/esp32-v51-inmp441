@@ -1,3 +1,9 @@
+
+/*
+Legacy 4.4 i2s driver.
+*/
+
+
 #include <iostream>
 
 #include "audio.h"
@@ -45,8 +51,6 @@ namespace
       .intr_alloc_flags = 0,
       .dma_buf_count = AUDIO_DMA_BUFFER_COUNT,
       .dma_buf_len = IS2_AUDIO_BUFFER_LEN,
-      //.use_apll = true
-      // .tx_desc_auto_clear ?
   };
 
   const i2s_pin_config_t pin_config = {

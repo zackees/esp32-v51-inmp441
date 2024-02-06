@@ -52,6 +52,7 @@ namespace
       .intr_alloc_flags = 0,
       .dma_buf_count = AUDIO_DMA_BUFFER_COUNT,
       .dma_buf_len = IS2_AUDIO_BUFFER_LEN,
+      //.use_apll = true
   };
 
   const i2s_pin_config_t pin_config = {
@@ -87,7 +88,7 @@ void i2s_audio_enter_light_sleep()
   digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone.
   gpio_hold_en(PIN_AUDIO_PWR);
   //i2s_stop(I2S_NUM_0);
-  i2s_driver_uninstall(I2S_NUM_0);
+  //i2s_driver_uninstall(I2S_NUM_0);
 }
 
 void i2s_audio_exit_light_sleep()
@@ -95,7 +96,7 @@ void i2s_audio_exit_light_sleep()
   // digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone.
 
   //i2s_start(I2S_NUM_0);
-  i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
+  //i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
 }
 
 size_t i2s_read_raw_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])

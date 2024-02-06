@@ -35,8 +35,7 @@
 #include "button.h"
 #include "low_power.h"
 
-#define MICORPHONE_CHECK_TIME 300
-#define N_AUDIO_dB_HISTORY 32
+#define SLEEP_TIME_MS 1
 
 void setup()
 {
@@ -57,7 +56,7 @@ void my_light_sleep(uint32_t duration_ms) {
     Serial.printf("Light sleep failed: %d\n", err);
   }
   //i2s_audio_shutdown();
-  //i2s_audio_enter_light_sleep();
+  i2s_audio_enter_light_sleep();
   err = esp_light_sleep_start();
   if (err != ESP_OK) {
     if (err == ESP_ERR_SLEEP_REJECT) {
@@ -66,9 +65,10 @@ void my_light_sleep(uint32_t duration_ms) {
       Serial.printf("Light sleep failed: %d\n", err);
     }
   }
-  //i2s_audio_exit_light_sleep();
+  i2s_audio_exit_light_sleep();
   //i2s_audio_init();
 }
+
 
 
 void i2s_sleep_test_microphone_distortion() {
@@ -91,7 +91,7 @@ void i2s_sleep_test_microphone_distortion() {
     }
   }
   Serial.printf("Now entering light sleep\n");
-  my_light_sleep(2000);
+  my_light_sleep(SLEEP_TIME_MS);
   Serial.printf("Exited light sleep, now outputting dB sound levels for one second.\n");
   end_time = millis() + 1000ul;
   start_time = millis();

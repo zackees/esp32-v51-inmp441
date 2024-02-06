@@ -52,11 +52,21 @@ void setup()
 }
 
 void my_light_sleep(uint32_t duration_ms) {
-  esp_sleep_enable_timer_wakeup(duration_ms * 1000);
+  esp_err_t err = esp_sleep_enable_timer_wakeup(duration_ms * 1000);
+  if (err != ESP_OK) {
+    Serial.printf("Light sleep failed: %d\n", err);
+  }
   //i2s_audio_shutdown();
-  i2s_audio_enter_light_sleep();
-  esp_light_sleep_start();
-  i2s_audio_exit_light_sleep();
+  //i2s_audio_enter_light_sleep();
+  err = esp_light_sleep_start();
+  if (err != ESP_OK) {
+    if (err == ESP_ERR_SLEEP_REJECT) {
+      Serial.printf("Light sleep failed: rejected\n");
+    } else {
+      Serial.printf("Light sleep failed: %d\n", err);
+    }
+  }
+  //i2s_audio_exit_light_sleep();
   //i2s_audio_init();
 }
 
@@ -77,11 +87,11 @@ void i2s_sleep_test_microphone_distortion() {
       int16_t* low = std::min_element(begin, end);
       int16_t* high = std::max_element(begin, end);
       int16_t vol = *high - *low;
-      Serial.printf("%d: max-min: %d\n", diff, vol);
+      Serial.printf("%d: max-min: %d, %d bytes read\n", diff, vol, bytes_read);
     }
   }
   Serial.printf("Now entering light sleep\n");
-  my_light_sleep(1);
+  my_light_sleep(2000);
   Serial.printf("Exited light sleep, now outputting dB sound levels for one second.\n");
   end_time = millis() + 1000ul;
   start_time = millis();
@@ -95,7 +105,7 @@ void i2s_sleep_test_microphone_distortion() {
       int16_t* low = std::min_element(begin, end);
       int16_t* high = std::max_element(begin, end);
       int16_t vol = *high - *low;
-      Serial.printf("%d: max-min: %d\n", diff, vol);
+      Serial.printf("%d: max-min: %d, %d bytes read\n", diff, vol, bytes_read);
     }
   }
 }

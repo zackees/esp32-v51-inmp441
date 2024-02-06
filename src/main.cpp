@@ -164,7 +164,10 @@ void legacy_test() {
   low_power_test();
 }
 
-void new_test() {
+void i2s_sleep_test_microphone_distortion() {
+  // Play test sound for one second, then enter light sleep mode for 1 ms, then output
+  // the microphone for 1 second.
+  Serial.printf("Playing test sound for one second, then entering light sleep for one second, then outputting dB sound levels for one second.\n");
   uint32_t end_time = millis() + 1000ul;
   uint32_t last_update_time = 0;
   while (millis() < end_time) {
@@ -191,5 +194,5 @@ void new_test() {
 // the loop function runs over and over again forever
 void loop()
 {
-  legacy_test();
+  i2s_sleep_test_microphone_distortion();
 }

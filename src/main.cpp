@@ -184,7 +184,7 @@ void i2s_sleep_test_microphone_distortion() {
   Serial.printf("Exited light sleep, now outputting dB sound levels for one second.\n");
   end_time = millis() + 1000ul;
   last_update_time = 0;
-  uint32_t start_time = millis();
+  start_time = millis();
   while (millis() < end_time) {
     audio_state_t audio_state = audio_update();
     if (audio_state.updated_at > last_update_time) {

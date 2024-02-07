@@ -27,140 +27,89 @@
 #include "math.h"
 
 #include "main.h"
-#include "led.h"
 #include "defs.h"
-#include "audio.h"
-#include "task.h"
-#include "util.h"
-#include "led_driver.h"
-#include "button.h"
-#include "low_power.h"
+#include "i2s_device.h"
 
-#define MICORPHONE_CHECK_TIME 300
-#define N_AUDIO_dB_HISTORY 32
-
-void led_ramp_test()
-{
-  cout << "LED ramp test\n";
-  for (int i = 0; i <= 255; i += 1)
-  {
-    if (button_is_pressed())
-    {
-      led_write(255);
-    }
-    else
-    {
-      led_write(i);
-    }
-    delay(3);
-  }
-  for (int i = 255; i >= 0; i -= 1)
-  {
-    if (button_is_pressed())
-    {
-      led_write(255);
-    }
-    else
-    {
-      led_write(i);
-    }
-    delay(3);
-  }
-}
+#define SLEEP_TIME_MS 1
+#define ENABLE_SLEEP 0
 
 void setup()
 {
   // initialize digital pin LED_BUILTIN as an output.
   // pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
-  button_setup();
-  cout << "Button initialized\n";
-  led_setup();
-  cout << "LED initialized\n";
-  audio_init();
-  cout << "Audio initialized\n";
-  cout << "Sound history buffer initialized\n";
-  // Startup led sequence.
-  led_ramp_test();
-  cout << "LED sync animation power ramp\n";
+  i2s_audio_init();
+
   // set alarm to fire every 0.1 second
   cout << "Initialized\n";
 }
 
-void button_test()
-{
-  cout << "button test\n";
-  if (button_is_pressed())
-  {
-    led_write(255);
+void my_light_sleep(uint32_t duration_ms) {
+  #if ENABLE_SLEEP
+  esp_err_t err = esp_sleep_enable_timer_wakeup(duration_ms * 1000);
+  if (err != ESP_OK) {
+    Serial.printf("Light sleep failed: %d\n", err);
   }
+  //i2s_audio_shutdown();
+  i2s_audio_enter_light_sleep();
+  err = esp_light_sleep_start();
+  if (err != ESP_OK) {
+    if (err == ESP_ERR_SLEEP_REJECT) {
+      Serial.printf("Light sleep failed: rejected\n");
+    } else {
+      Serial.printf("Light sleep failed: %d\n", err);
+    }
+  }
+  i2s_audio_exit_light_sleep();
+  //i2s_audio_init();
+  #else
+  Serial.printf("Light sleep disabled\n");
+  #endif
 }
 
-void audio_test()
-{
-  cout << "audio test\n";
-  uint32_t expired_time = millis() + 5000ul;
-  uint32_t last_audio_update_time = 0;
-  while (millis() < expired_time)
-  {
-    audio_state_t audio_state = audio_update();
-    bool has_update = audio_state.updated_at != last_audio_update_time;
-    if (!has_update)
-    {
-      continue;
-    }
-    if (audio_state.dB > 70.0f || button_is_pressed())
-    {
-      led_write(255);
-    }
-    else
-    {
-      led_write(0);
-    }
-  }
-}
 
-void low_power_test()
-{
-  cout << "low power test\n";
-  uint32_t start_button_press_time = millis();
-  uint32_t timetout = 1000ul;
-  if (button_is_pressed())
-  {
-    cout << "Button is pressed, waiting one second to test again\n";
-    delay(1000);
-    if (button_is_pressed())
-    {
-      cout << "Doing a light sleep then checking microphone" << endl;
-      light_sleep(1);
-      cout << "Now doing a microphone check. In a broken state the IS2 will read high values (>70 dB) before settling down to ambient noise levels.\n";
-      uint32_t start_time_mic_check = millis();
-      uint32_t last_audio_update_time = 0;
-      while (true)
-      {
-        uint32_t diff = millis() - start_time_mic_check;
-        if (diff > MICORPHONE_CHECK_TIME)
-        {
-          break;
-        }
-        audio_state_t audio_state = audio_update();
-        bool has_update = audio_state.updated_at != last_audio_update_time;
-        // print the dB of the audio
-        cout << "dB: " << audio_state.dB << endl;
-      }
+
+void i2s_sleep_test_microphone_distortion() {
+  // Play test sound for one second, then enter light sleep mode for 1 ms, then output
+  // the microphone for 1 second.
+  Serial.printf("Playing test sound for one second, then entering light sleep for one second, then outputting dB sound levels for one second.\n");
+  uint32_t end_time = millis() + 1000ul;
+  uint32_t start_time = millis();
+  while (millis() < end_time) {
+    audio_buffer_t buffer = {0};
+    size_t bytes_read = i2s_read_raw_samples(buffer);
+    if (bytes_read > 0) {
+      uint32_t diff = millis() - start_time;
+      audio_sample_t* begin = &buffer[0];
+      audio_sample_t* end = &buffer[bytes_read];
+      int16_t* low = std::min_element(begin, end);
+      int16_t* high = std::max_element(begin, end);
+      int16_t vol = *high - *low;
+      Serial.printf("%d: max-min: %d, %d bytes read\n", diff, vol, bytes_read);
     }
   }
-  else
-  {
-    cout << "Button is not pressed, exiting low power test\n";
+  Serial.printf("Now entering light sleep\n");
+  my_light_sleep(SLEEP_TIME_MS);
+  Serial.printf("Exited light sleep, now outputting dB sound levels for one second.\n");
+  end_time = millis() + 1000ul;
+  start_time = millis();
+  while (millis() < end_time) {
+    audio_buffer_t buffer = {0};
+    size_t bytes_read = i2s_read_raw_samples(buffer);
+    if (bytes_read > 0) {
+      uint32_t diff = millis() - start_time;
+      audio_sample_t* begin = &buffer[0];
+      audio_sample_t* end = &buffer[bytes_read];
+      int16_t* low = std::min_element(begin, end);
+      int16_t* high = std::max_element(begin, end);
+      int16_t vol = *high - *low;
+      Serial.printf("%d: max-min: %d, %d bytes read\n", diff, vol, bytes_read);
+    }
   }
 }
 
 // the loop function runs over and over again forever
 void loop()
 {
-  led_ramp_test();
-  button_test();
-  audio_test();
-  low_power_test();
+  i2s_sleep_test_microphone_distortion();
 }

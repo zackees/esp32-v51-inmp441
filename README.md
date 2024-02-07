@@ -65,5 +65,4 @@ Simply power the board and read the stdout through the connection monitor.
 
   * XIAO:
     * ![image](https://github.com/zackees/noodz-soundreactive/assets/6856673/b1114268-d4b9-4eeb-9ecf-c81d819812d9)
-  * Generic ESP32-C3
-    * ![image](https://github.com/zackees/noodz-soundreactive/assets/6856673/4beef3b1-20db-4457-be57-3be4b7ca0fc7)
+

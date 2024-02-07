@@ -6,7 +6,9 @@ The bug that is tracking this can be found here:
 
 [https://github.com/espressif/arduino-esp32/issues/8207](https://github.com/espressif/arduino-esp32/issues/8207)
 
-For the life of me, I cannot get this popular mems microphone to work.
+This repo demonstrates that the INMP441 will not function with the new 5.1 I2S library.
+
+There could just be a setting or something wrong that I'm doing (probably). I've done everything I could think of in the documentation and simply cannot get the new library to work.
 
 # Guides
 

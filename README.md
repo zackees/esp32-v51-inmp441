@@ -35,59 +35,13 @@ L/R -> VDD
 
 # Test routine
 
-  Prior to test please SOLDER ON AN LED to EXTERNAL LED on board. Add a 120 ohm resistor in series with the LED.
-
-
-https://github.com/zackees/xiao-inmp441-test/assets/6856673/368250d2-1b81-4c72-8af0-213dab47555c
+Simply power the board and read the stdout through the connection monitor.
 
 
 
-  * Software Test
-    * Fade on-off blink test (1 second): Led should fade on/off
-      * If LED does not come on then FAIL
-    * 5 seconds: ambient sound level check
-      * Clap your hands
-        * if led does not come on THEN FAIL
-    * Click button, lights go on always
-      * if no LED on then FAIL
-    * SUCCESS
+# Schematic
 
-Prior to the battery test please solder on a lipo pouch cell >= 150 mA to the battery connections on the board.
-
-  * Battery Test
-    * Plug in power USBC
-      * If no RED CHARGE LIGHT then FAIL
-    * Unplug power USBC
-      * If device turns off then FAIL
-    * Desolder battery
-    * If not failure then SUCCESS
-
-# Low power test
-
-This is designed for espressif.
-
-This test shows how the IS2 doesn't wake from sleep.
-
-  * Activate the VSCode serial monitor to the ESP32 to check std::cout output.
-  * During the test, hold down the user button for a number of seconds.
-  * Eventually you hit the low power test, keep holding the button.
-  * Low power will enter then the microphone will be checked for 300 ms.
-  * Example output (see below).
-
-#### Example output
-
-```
-Now doing a microphone check. In a broken state the IS2 will read high values (>70 dB) before settling down to ambient noise levels.
-dB: 87.0328
-dB: 87.0328
-dB: 86.664
-...
-db: 50.233
-```
-
-# Owner's design:
-
-![image](https://github.com/zackees/xiao-inmp441-test/assets/6856673/7017fa5a-ff1d-4d03-8c54-105cfbb52e59)
+![image](https://github.com/zackees/esp32-v51-inmp441/assets/6856673/95f2223f-6127-4bc0-a346-03e80c125f60)
 
 
 # XIAO Pins

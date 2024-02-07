@@ -36,6 +36,7 @@
 #include "low_power.h"
 
 #define SLEEP_TIME_MS 1
+#define ENABLE_SLEEP 0
 
 void setup()
 {
@@ -51,6 +52,7 @@ void setup()
 }
 
 void my_light_sleep(uint32_t duration_ms) {
+  #if ENABLE_SLEEP
   esp_err_t err = esp_sleep_enable_timer_wakeup(duration_ms * 1000);
   if (err != ESP_OK) {
     Serial.printf("Light sleep failed: %d\n", err);
@@ -67,6 +69,7 @@ void my_light_sleep(uint32_t duration_ms) {
   }
   i2s_audio_exit_light_sleep();
   //i2s_audio_init();
+  #endif
 }
 
 

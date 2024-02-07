@@ -1,3 +1,13 @@
+# ESP32-v51-inmp441
+
+This contains an attempt to get the very popular INMP441 mems microphone working with the v5.1 esp32 I2S library and test the light sleep issue reported here [https://github.com/espressif/arduino-esp32/pull/8714](https://github.com/espressif/arduino-esp32/pull/8714)
+
+The bug that is tracking this can be found here:
+
+[https://github.com/espressif/arduino-esp32/issues/8207](https://github.com/espressif/arduino-esp32/issues/8207)
+
+For the life of me, I cannot get this popular mems microphone to work.
+
 # Guides
 
 https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started

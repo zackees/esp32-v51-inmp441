@@ -93,6 +93,46 @@ namespace
     return ctx;
   }
 
+  I2SContext make_std_i2s() {
+    //I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG
+
+
+    I2SContext ctx;
+    i2s_chan_handle_t rx_chan = NULL;
+    i2s_chan_handle_t tx_chan = NULL;
+    i2s_chan_config_t i2s_chan_cfg_rx = {
+        .id = I2S_NUM_0,
+        .role = I2S_ROLE_MASTER,
+        .dma_desc_num = 6,
+        .dma_frame_num = 240,
+        .auto_clear = false,
+    };
+    i2s_std_config_t i2s_std_cfg_rx = {
+        .clk_cfg = {
+            .sample_rate_hz = AUDIO_SAMPLE_RATE,
+            .clk_src = i2s_clock_src_t(I2S_CLK_SRC_PLL_160M),
+            .mclk_multiple = I2S_MCLK_MULTIPLE_384,
+        },
+
+        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_32BIT, I2S_SLOT_MODE_MONO),        
+        .gpio_cfg = {
+            .mclk = I2S_GPIO_UNUSED,
+            .bclk = PIN_I2S_SCK,
+            .ws = PIN_I2S_WS,
+            .dout = I2S_GPIO_UNUSED,
+            .din = PIN_IS2_SD,
+            .invert_flags = {
+                .mclk_inv = false,
+                .bclk_inv = false,
+                .ws_inv = false,
+            },
+        },
+    }; //
+
+    ctx = {rx_chan, i2s_chan_cfg_rx, i2s_std_cfg_rx};
+    return ctx;
+  }
+
   void init_pulldown_datapin()
   {
     gpio_config_t io_conf;
@@ -106,7 +146,8 @@ namespace
 
   void init_i2s_pins()
   {
-    g_i2s_context = get_i2s_context();
+    //g_i2s_context = get_i2s_context();
+    g_i2s_context = make_std_i2s();
     esp_err_t err = i2s_new_channel(&g_i2s_context.i2s_chan_cfg_rx, NULL, &g_i2s_context.rx_chan);
     ESP_ERROR_CHECK(err);
     err = i2s_channel_init_std_mode(g_i2s_context.rx_chan, &g_i2s_context.i2s_std_cfg_rx);

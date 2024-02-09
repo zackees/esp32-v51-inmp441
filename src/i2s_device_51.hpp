@@ -135,9 +135,9 @@ void audio_sample_to_bit_string(internal_audio_sample_t sample, char* buffer, si
   ASSERT(buffer_size > 32, "Buffer too small");
   for (size_t i = 0; i < 32; i++)
   {
-    buffer[i] = (sample & (1 << (32 - i))) ? '1' : ' ';
+    buffer[i] = (sample & (1 << (31 - i))) ? '1' : ' ';
   }
-  buffer[16] = '\0';
+  buffer[32] = '\0';
 }
 
 size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
@@ -160,7 +160,7 @@ size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
         {
           //Serial.printf("Sample %d: %d\n", i, s_native_buffer[i]);
           // Print out the full bit pattern of the sample
-          char buff[33];
+          char buff[128];
           audio_sample_to_bit_string(s_native_buffer[i], buff, sizeof(buff));
           Serial.printf("Sample %d: %s\n", i, buff);
         }

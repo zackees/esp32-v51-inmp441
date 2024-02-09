@@ -130,6 +130,15 @@ void i2s_audio_exit_light_sleep()
   // i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
 }
 
+void audio_sample_to_bit_string(audio_sample_t sample, char* buffer, size_t buffer_size)
+{
+  ASSERT(buffer_size >= 17, "Buffer too small");
+  for (size_t i = 0; i < 16; i++)
+  {
+    buffer[i] = (sample & (1 << (15 - i))) ? '1' : '0';
+  }
+  buffer[16] = '\0';
+}
 
 size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
 {
@@ -149,7 +158,11 @@ size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
         // print out the first 10 samples
         if (i < 10)
         {
-          Serial.printf("Sample %d: %d\n", i, s_native_buffer[i]);
+          //Serial.printf("Sample %d: %d\n", i, s_native_buffer[i]);
+          // Print out the full bit pattern of the sample
+          char buff[17];
+          audio_sample_to_bit_string(buffer[i], buff, sizeof(buff));
+          Serial.printf("Sample %d: %s\n", i, buff);
         }
       }
       return count;

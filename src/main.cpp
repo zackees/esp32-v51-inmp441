@@ -89,12 +89,12 @@ void i2s_sleep_test_microphone_distortion() {
       audio_sample_t* begin = &buffer[0];
       audio_sample_t* end = &buffer[bytes_read];
       int32_t vol = max_volume(begin, end);
-      Serial.printf("%d: max-min: %d, %d samples read\n", diff, vol, bytes_read);
+      std::cout << "vol: " << vol << std::endl;
     }
   }
   Serial.printf("Now entering light sleep\n");
   my_light_sleep(SLEEP_TIME_MS);
-  Serial.printf("Exited light sleep, now outputting dB sound levels for one second.\n");
+  Serial.printf("Exited light sleep, now outputting sound levels for one second.\n");
   end_time = millis() + 1000ul;
   start_time = millis();
   while (millis() < end_time) {
@@ -107,10 +107,12 @@ void i2s_sleep_test_microphone_distortion() {
       audio_sample_t* low = std::min_element(begin, end);
       audio_sample_t* high = std::max_element(begin, end);
       //Serial.printf("max: %d, min: %d\n", *high, *low);
-      std::cout << "max: " << *high << ", min: " << *low << std::endl;
+      //std::cout << "max: " << *high << ", min: " << *low << std::endl;
       int32_t vol = max_volume(begin, end);
       //Serial.printf("%d: max-min: %d, %d samples read\n", diff, vol, bytes_read);
-      std::cout << diff << ": max-min: " << vol << ", " << bytes_read << " samples read" << std::endl;
+      //std::cout << diff << ": max-min: " << vol << ", " << bytes_read << " samples read" << std::endl;
+      // print vol
+      std::cout << "vol: " << vol << std::endl;
     }
   }
 }

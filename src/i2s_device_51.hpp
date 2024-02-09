@@ -135,7 +135,7 @@ void audio_sample_to_bit_string(audio_sample_t sample, char* buffer, size_t buff
   ASSERT(buffer_size >= 17, "Buffer too small");
   for (size_t i = 0; i < 16; i++)
   {
-    buffer[i] = (sample & (1 << (15 - i))) ? '1' : '0';
+    buffer[i] = (sample & (1 << (15 - i))) ? '1' : ' ';
   }
   buffer[16] = '\0';
 }

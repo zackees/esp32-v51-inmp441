@@ -71,7 +71,7 @@ void my_light_sleep(uint32_t duration_ms) {
 int32_t max_volume(audio_sample_t* begin, audio_sample_t* end) {
   audio_sample_t* low = std::min_element(begin, end);
   audio_sample_t* high = std::max_element(begin, end);
-  return *high - *low;
+  return int32_t(*high) - *low;
 }
 
 

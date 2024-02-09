@@ -17,11 +17,12 @@ namespace
   enum {
     INMP441_BIT_RESOLUTION = 24,
     INMP441_CHANNELS = 1,
+    INMP441_FULL_FRAME_SIZE = 32
   };
 
-  typedef int32_t internal_audio_sample_t;
+  typedef int16_t internal_audio_sample_t;
 
-  static_assert(sizeof(internal_audio_sample_t) == 4, "INMP441 samples 24 bit audio in a 32 bit frame.");
+  static_assert(sizeof(internal_audio_sample_t) == 2, "INMP441 downsamples 24 bit audio -> 16 bit. In a 32 bit frame.");
   static_assert(AUDIO_BIT_RESOLUTION == 16, "Only 16 bit resolution is outputted by the microphone");
   static_assert(AUDIO_CHANNELS == 1, "Only 1 channel is supported");
   static_assert(sizeof(audio_sample_t) == 2, "audio_sample_t must be 16 bit");
@@ -48,7 +49,7 @@ namespace
     i2s_std_config_t rx_std_cfg = {
         .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(AUDIO_CHANNEL_SAMPLE_RATE),
         .slot_cfg = {
-                .data_bit_width = I2S_DATA_BIT_WIDTH_24BIT,
+                .data_bit_width = I2S_DATA_BIT_WIDTH_16BIT,
                 .slot_bit_width = I2S_SLOT_BIT_WIDTH_32BIT,
                 .slot_mode = I2S_SLOT_MODE_MONO,
                 .slot_mask = I2S_STD_SLOT_RIGHT,
@@ -130,15 +131,6 @@ void i2s_audio_exit_light_sleep()
   // i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
 }
 
-void audio_sample_to_bit_string(internal_audio_sample_t sample, char* buffer, size_t buffer_size)
-{
-  ASSERT(buffer_size > 32, "Buffer too small");
-  for (size_t i = 0; i < 32; i++)
-  {
-    buffer[i] = (sample & (1 << (31 - i))) ? '1' : ' ';
-  }
-  buffer[32] = '\0';
-}
 
 size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
 {
@@ -154,16 +146,7 @@ size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
       {
         // First 24 bits are significant. Last byte is padding/garbage.
         // But we only want the first 16 bits.
-        buffer[i] = s_native_buffer[i] >> 16;
-        // print out the first 10 samples
-        if (i < 10)
-        {
-          //Serial.printf("Sample %d: %d\n", i, s_native_buffer[i]);
-          // Print out the full bit pattern of the sample
-          char buff[128];
-          audio_sample_to_bit_string(s_native_buffer[i], buff, sizeof(buff));
-          Serial.printf("Sample %d: %s\n", i, buff);
-        }
+        buffer[i] = s_native_buffer[i];
       }
       return count;
     }

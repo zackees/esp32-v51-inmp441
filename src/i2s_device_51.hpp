@@ -20,9 +20,7 @@ namespace
     INMP441_FULL_FRAME_SIZE = 32
   };
 
-  typedef int16_t internal_audio_sample_t;
 
-  static_assert(sizeof(internal_audio_sample_t) == 2, "INMP441 downsamples 24 bit audio -> 16 bit. In a 32 bit frame.");
   static_assert(AUDIO_BIT_RESOLUTION == 16, "Only 16 bit resolution is outputted by the microphone");
   static_assert(AUDIO_CHANNELS == 1, "Only 1 channel is supported");
   static_assert(sizeof(audio_sample_t) == 2, "audio_sample_t must be 16 bit");
@@ -33,8 +31,6 @@ namespace
     i2s_chan_config_t i2s_chan_cfg_rx;
     i2s_std_config_t i2s_std_cfg_rx;
   };
-
-  internal_audio_sample_t s_native_buffer[IS2_AUDIO_BUFFER_LEN];
 
   I2SContext make_inmp441_context() {
     I2SContext ctx;
@@ -135,19 +131,13 @@ void i2s_audio_exit_light_sleep()
 size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
 {
   size_t bytes_read = 0;
-  esp_err_t err = i2s_channel_read(s_i2s_context.rx_chan, s_native_buffer, sizeof(s_native_buffer), &bytes_read, 0);
-  const size_t count = bytes_read / sizeof(internal_audio_sample_t);
-  ASSERT(bytes_read / sizeof(internal_audio_sample_t) <= IS2_AUDIO_BUFFER_LEN, "Buffer overflow!");
+  esp_err_t err = i2s_channel_read(s_i2s_context.rx_chan, buffer, sizeof(buffer), &bytes_read, 0);
+  const size_t count = bytes_read / sizeof(audio_sample_t);
+  ASSERT(bytes_read / sizeof(audio_sample_t) <= IS2_AUDIO_BUFFER_LEN, "Buffer overflow!");
   if (err == ESP_OK)
   {
     if (bytes_read > 0)
     {
-      for (size_t i = 0; i < count; i++)
-      {
-        // First 24 bits are significant. Last byte is padding/garbage.
-        // But we only want the first 16 bits.
-        buffer[i] = s_native_buffer[i];
-      }
       return count;
     }
   }

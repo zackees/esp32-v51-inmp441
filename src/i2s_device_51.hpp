@@ -32,9 +32,9 @@ Uses the new idf 5.1 i2s driver..
 
 namespace
 {
-  static_assert(AUDIO_BIT_RESOLUTION == 16, "Only 16 bit resolution is supported");
+  static_assert(AUDIO_BIT_RESOLUTION == 24, "Only 16 bit resolution is supported");
   static_assert(AUDIO_CHANNELS == 1, "Only 1 channel is supported");
-  static_assert(sizeof(audio_sample_t) == 2, "audio_sample_t must be 16 bit");
+  static_assert(sizeof(audio_sample_t) == 4, "audio_sample_t must be 32 bit");
 
   struct I2SContext
   {
@@ -218,10 +218,52 @@ namespace
     gpio_config(&io_conf);
   }
 
+  I2SContext make_inmp441_context() {
+    I2SContext ctx;
+    i2s_chan_handle_t rx_chan = NULL;
+    i2s_chan_handle_t tx_chan = NULL;
+    i2s_chan_config_t i2s_chan_cfg_rx = {
+        .id = I2S_NUM_0,
+        .role = I2S_ROLE_MASTER,
+        .dma_desc_num = 6,
+        .dma_frame_num = 240,
+        .auto_clear = false,
+    };
+    i2s_std_config_t rx_std_cfg = {
+        .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(16000),
+        .slot_cfg = {
+                .data_bit_width = I2S_DATA_BIT_WIDTH_24BIT,
+                .slot_bit_width = I2S_SLOT_BIT_WIDTH_32BIT,
+                .slot_mode = I2S_SLOT_MODE_MONO,
+                .slot_mask = I2S_STD_SLOT_RIGHT,
+                .ws_width = 32,
+                .ws_pol = false,
+                .bit_shift = true,
+                .left_align = true,
+                .big_endian = false,
+                .bit_order_lsb = false,
+        },
+        .gpio_cfg = {
+                .mclk = I2S_GPIO_UNUSED,
+                .bclk = PIN_I2S_SCK,
+                .ws   = PIN_I2S_WS,
+                .dout = I2S_GPIO_UNUSED,
+                .din  = PIN_IS2_SD,
+                .invert_flags = {
+                        .mclk_inv = false,
+                        .bclk_inv = true,
+                        .ws_inv   = false,
+                },
+        },
+    };
+    ctx = {rx_chan, i2s_chan_cfg_rx, rx_std_cfg};
+    return ctx;
+  }
+
   void init_i2s_pins()
   {
     //g_i2s_context = get_i2s_context();
-    g_i2s_context = make_msb_i2s();
+    g_i2s_context = make_inmp441_context();
     esp_err_t err = i2s_new_channel(&g_i2s_context.i2s_chan_cfg_rx, NULL, &g_i2s_context.rx_chan);
     ESP_ERROR_CHECK(err);
     err = i2s_channel_init_std_mode(g_i2s_context.rx_chan, &g_i2s_context.i2s_std_cfg_rx);

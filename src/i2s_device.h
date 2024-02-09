@@ -4,8 +4,8 @@
 
 #include "defs.h"
 
-#if AUDIO_BIT_RESOLUTION == 16 && AUDIO_CHANNELS == 1
-typedef int16_t audio_sample_t;
+#if AUDIO_BIT_RESOLUTION == 24 && AUDIO_CHANNELS == 1
+typedef int32_t audio_sample_t;
 #else
 #error "Unsupported audio configuration"
 #endif

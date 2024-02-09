@@ -70,6 +70,11 @@ void my_light_sleep(uint32_t duration_ms) {
 
 
 void i2s_sleep_test_microphone_distortion() {
+  Serial.printf("Testing microphone distortion\n");
+  for (int i = 0; i < 5; i++) {
+    Serial.printf("sleeping 1 second\n");
+    delay(1000);
+  }
   // Play test sound for one second, then enter light sleep mode for 1 ms, then output
   // the microphone for 1 second.
   Serial.printf("Playing test sound for one second, then entering light sleep for one second, then outputting dB sound levels for one second.\n");
@@ -82,9 +87,9 @@ void i2s_sleep_test_microphone_distortion() {
       uint32_t diff = millis() - start_time;
       audio_sample_t* begin = &buffer[0];
       audio_sample_t* end = &buffer[bytes_read];
-      int16_t* low = std::min_element(begin, end);
-      int16_t* high = std::max_element(begin, end);
-      int16_t vol = *high - *low;
+      audio_sample_t* low = std::min_element(begin, end);
+      audio_sample_t* high = std::max_element(begin, end);
+      audio_sample_t vol = *high - *low;
       Serial.printf("%d: max-min: %d, %d bytes read\n", diff, vol, bytes_read);
     }
   }
@@ -100,9 +105,9 @@ void i2s_sleep_test_microphone_distortion() {
       uint32_t diff = millis() - start_time;
       audio_sample_t* begin = &buffer[0];
       audio_sample_t* end = &buffer[bytes_read];
-      int16_t* low = std::min_element(begin, end);
-      int16_t* high = std::max_element(begin, end);
-      int16_t vol = *high - *low;
+      audio_sample_t* low = std::min_element(begin, end);
+      audio_sample_t* high = std::max_element(begin, end);
+      audio_sample_t vol = *high - *low;
       Serial.printf("%d: max-min: %d, %d bytes read\n", diff, vol, bytes_read);
     }
   }

@@ -90,6 +90,9 @@ namespace
     ESP_ERROR_CHECK(err);
     err = i2s_channel_enable(s_i2s_context.rx_chan);
     ESP_ERROR_CHECK(err);
+
+    // Set the pulldown resistor on the SD pin
+    gpio_set_pull_mode(PIN_IS2_SD, GPIO_PULLDOWN_ONLY);
   }
 } // namespace
 

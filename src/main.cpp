@@ -31,7 +31,7 @@
 #include "i2s_device.h"
 
 #define SLEEP_TIME_MS 1
-#define ENABLE_SLEEP 0
+#define ENABLE_SLEEP 1
 
 void setup()
 {

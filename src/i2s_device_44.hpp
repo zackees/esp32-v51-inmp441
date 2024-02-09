@@ -95,7 +95,7 @@ void i2s_audio_exit_light_sleep()
   //i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
 }
 
-size_t i2s_read_raw_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
+size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
 {
 
   size_t bytes_read = 0;

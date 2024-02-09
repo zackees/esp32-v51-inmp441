@@ -1,6 +1,7 @@
 
 /*
 Uses the new idf 5.1 i2s driver..
+Not thread safe.
 */
 
 #include <iostream>
@@ -18,9 +19,12 @@ namespace
     INMP441_CHANNELS = 1,
   };
 
-  static_assert(AUDIO_BIT_RESOLUTION == 24, "Only 24 bit resolution is supported with inmp441");
+  typedef int32_t internal_audio_sample_t;
+
+  static_assert(sizeof(internal_audio_sample_t) == 4, "INMP441 samples 24 bit audio in a 32 bit frame.");
+  static_assert(AUDIO_BIT_RESOLUTION == 16, "Only 16 bit resolution is outputted by the microphone");
   static_assert(AUDIO_CHANNELS == 1, "Only 1 channel is supported");
-  static_assert(sizeof(audio_sample_t) == 4, "audio_sample_t must be 32 bit");
+  static_assert(sizeof(audio_sample_t) == 2, "audio_sample_t must be 16 bit");
 
   struct I2SContext
   {
@@ -29,6 +33,7 @@ namespace
     i2s_std_config_t i2s_std_cfg_rx;
   };
 
+  internal_audio_sample_t s_native_buffer[IS2_AUDIO_BUFFER_LEN];
 
   I2SContext make_inmp441_context() {
     I2SContext ctx;
@@ -71,19 +76,19 @@ namespace
     return ctx;
   }
   
-  I2SContext g_i2s_context = make_inmp441_context();
+  I2SContext s_i2s_context = make_inmp441_context();
 
   void init_i2s_pins()
   {
-    //g_i2s_context = get_i2s_context();
-    esp_err_t err = i2s_new_channel(&g_i2s_context.i2s_chan_cfg_rx, NULL, &g_i2s_context.rx_chan);
+    //s_i2s_context = get_i2s_context();
+    esp_err_t err = i2s_new_channel(&s_i2s_context.i2s_chan_cfg_rx, NULL, &s_i2s_context.rx_chan);
     ESP_ERROR_CHECK(err);
-    err = i2s_channel_init_std_mode(g_i2s_context.rx_chan, &g_i2s_context.i2s_std_cfg_rx);
+    err = i2s_channel_init_std_mode(s_i2s_context.rx_chan, &s_i2s_context.i2s_std_cfg_rx);
     ESP_ERROR_CHECK(err);
     i2s_chan_info_t info;
-    err = i2s_channel_get_info(g_i2s_context.rx_chan, &info);
+    err = i2s_channel_get_info(s_i2s_context.rx_chan, &info);
     ESP_ERROR_CHECK(err);
-    err = i2s_channel_enable(g_i2s_context.rx_chan);
+    err = i2s_channel_enable(s_i2s_context.rx_chan);
     ESP_ERROR_CHECK(err);
   }
 } // namespace
@@ -101,7 +106,7 @@ void i2s_audio_shutdown()
 {
   // i2s_stop(I2S_NUM_0);
   // i2s_driver_uninstall(I2S_NUM_0);
-  i2s_del_channel(g_i2s_context.rx_chan);
+  i2s_del_channel(s_i2s_context.rx_chan);
 }
 
 void i2s_audio_enter_light_sleep()
@@ -122,21 +127,23 @@ void i2s_audio_exit_light_sleep()
   // i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
 }
 
-size_t i2s_read_raw_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
+
+size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
 {
   size_t bytes_read = 0;
-  esp_err_t err = i2s_channel_read(g_i2s_context.rx_chan, buffer, sizeof(buffer), &bytes_read, 0);
+  esp_err_t err = i2s_channel_read(s_i2s_context.rx_chan, s_native_buffer, sizeof(s_native_buffer), &bytes_read, 0);
+  const size_t count = bytes_read / sizeof(internal_audio_sample_t);
+  ASSERT(bytes_read / sizeof(internal_audio_sample_t) <= IS2_AUDIO_BUFFER_LEN, "Buffer overflow!");
   if (err == ESP_OK)
   {
     if (bytes_read > 0)
     {
-      for (size_t i = 0; i < bytes_read / sizeof(audio_sample_t); i++)
+      for (size_t i = 0; i < count; i++)
       {
-        // First 24 bits are significant. But we want 16 bits so
-        // byte shift twice.
-        buffer[i] = buffer[i] >> 16;
+        // First 24 bits are significant. Last byte is padding/garbage.
+        // But we only want the first 16 bits.
+        buffer[i] = s_native_buffer[i] >> 16;
       }
-      const size_t count = bytes_read / sizeof(audio_sample_t);
       return count;
     }
   }

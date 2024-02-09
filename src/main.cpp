@@ -68,6 +68,11 @@ void my_light_sleep(uint32_t duration_ms) {
   #endif
 }
 
+audio_sample_t max_volume(audio_sample_t* begin, audio_sample_t* end) {
+  audio_sample_t* low = std::min_element(begin, end);
+  audio_sample_t* high = std::max_element(begin, end);
+  return *high - *low;
+}
 
 
 void i2s_sleep_test_microphone_distortion() {
@@ -78,14 +83,12 @@ void i2s_sleep_test_microphone_distortion() {
   uint32_t start_time = millis();
   while (millis() < end_time) {
     audio_buffer_t buffer = {0};
-    size_t bytes_read = i2s_read_raw_samples(buffer);
+    size_t bytes_read = i2s_read_samples(buffer);
     if (bytes_read > 0) {
       uint32_t diff = millis() - start_time;
       audio_sample_t* begin = &buffer[0];
       audio_sample_t* end = &buffer[bytes_read];
-      audio_sample_t* low = std::min_element(begin, end);
-      audio_sample_t* high = std::max_element(begin, end);
-      audio_sample_t vol = *high - *low;
+      audio_sample_t vol = max_volume(begin, end);
       Serial.printf("%d: max-min: %d, %d bytes read\n", diff, vol, bytes_read);
     }
   }
@@ -96,7 +99,7 @@ void i2s_sleep_test_microphone_distortion() {
   start_time = millis();
   while (millis() < end_time) {
     audio_buffer_t buffer = {0};
-    size_t bytes_read = i2s_read_raw_samples(buffer);
+    size_t bytes_read = i2s_read_samples(buffer);
     if (bytes_read > 0) {
       uint32_t diff = millis() - start_time;
       audio_sample_t* begin = &buffer[0];
@@ -105,8 +108,7 @@ void i2s_sleep_test_microphone_distortion() {
       audio_sample_t* high = std::max_element(begin, end);
       //Serial.printf("max: %d, min: %d\n", *high, *low);
       std::cout << "max: " << *high << ", min: " << *low << std::endl;
-      audio_sample_t vol = *high;
-      vol -= *low;
+      audio_sample_t vol = max_volume(begin, end);
       //Serial.printf("%d: max-min: %d, %d samples read\n", diff, vol, bytes_read);
       std::cout << diff << ": max-min: " << vol << ", " << bytes_read << " samples read" << std::endl;
     }

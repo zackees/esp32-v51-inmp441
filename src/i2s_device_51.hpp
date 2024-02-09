@@ -230,11 +230,11 @@ namespace
         .auto_clear = false,
     };
     i2s_std_config_t rx_std_cfg = {
-        .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(16000),
+        .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(48000),
         .slot_cfg = {
                 .data_bit_width = I2S_DATA_BIT_WIDTH_24BIT,
                 .slot_bit_width = I2S_SLOT_BIT_WIDTH_32BIT,
-                .slot_mode = I2S_SLOT_MODE_MONO,
+                .slot_mode = I2S_SLOT_MODE_STEREO,
                 .slot_mask = I2S_STD_SLOT_RIGHT,
                 .ws_width = 32,
                 .ws_pol = false,
@@ -264,6 +264,7 @@ namespace
   {
     //g_i2s_context = get_i2s_context();
     g_i2s_context = make_inmp441_context();
+
     esp_err_t err = i2s_new_channel(&g_i2s_context.i2s_chan_cfg_rx, NULL, &g_i2s_context.rx_chan);
     ESP_ERROR_CHECK(err);
     err = i2s_channel_init_std_mode(g_i2s_context.rx_chan, &g_i2s_context.i2s_std_cfg_rx);

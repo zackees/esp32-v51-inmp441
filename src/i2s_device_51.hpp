@@ -6,19 +6,19 @@ Uses the new idf 5.1 i2s driver..
 #include <iostream>
 #include <Arduino.h>
 #include "defs.h"
-// #include <driver/i2s.h>
 #include <driver/i2s_std.h>
 #include "i2s_device.h"
 #include "driver/gpio.h"
 
-#include "i2s_device.h"
-
-#define SD_PULLDOWN_ENABLED 0
-
 
 namespace
 {
-  static_assert(AUDIO_BIT_RESOLUTION == 24, "Only 16 bit resolution is supported");
+  enum {
+    INMP441_BIT_RESOLUTION = 24,
+    INMP441_CHANNELS = 1,
+  };
+
+  static_assert(AUDIO_BIT_RESOLUTION == 24, "Only 24 bit resolution is supported with inmp441");
   static_assert(AUDIO_CHANNELS == 1, "Only 1 channel is supported");
   static_assert(sizeof(audio_sample_t) == 4, "audio_sample_t must be 32 bit");
 
@@ -33,7 +33,6 @@ namespace
   I2SContext make_inmp441_context() {
     I2SContext ctx;
     i2s_chan_handle_t rx_chan = NULL;
-    i2s_chan_handle_t tx_chan = NULL;
     i2s_chan_config_t i2s_chan_cfg_rx = {
         .id = I2S_NUM_0,
         .role = I2S_ROLE_MASTER,
@@ -42,7 +41,7 @@ namespace
         .auto_clear = false,
     };
     i2s_std_config_t rx_std_cfg = {
-        .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(48000),
+        .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(AUDIO_CHANNEL_SAMPLE_RATE),
         .slot_cfg = {
                 .data_bit_width = I2S_DATA_BIT_WIDTH_24BIT,
                 .slot_bit_width = I2S_SLOT_BIT_WIDTH_32BIT,
@@ -83,36 +82,9 @@ namespace
     i2s_chan_info_t info;
     err = i2s_channel_get_info(g_i2s_context.rx_chan, &info);
     ESP_ERROR_CHECK(err);
-    delay(1000);
-    Serial.printf("I2S channel info: %d, %d, %d, %d, %d\n", info.id, info.role, info.dir, info.mode, info.pair_chan);
-    delay(500);
-
-    ESP_ERROR_CHECK(err);
     err = i2s_channel_enable(g_i2s_context.rx_chan);
     ESP_ERROR_CHECK(err);
-
-    gpio_num_t gpio_pin = PIN_IS2_SD; // Replace with your GPIO pin
-
-// Data sheet recommends a pulldown on the input pin when connecting stero microphones.
-// However this may also be necessary in mono mode because of the tri state nature of the
-// I2S bus.
-// Configure the pin as an input
-#if SD_PULLDOWN_ENABLED
-    init_pulldown_datapin();
-#endif
   }
-
-  void init_pulldown_datapin()
-  {
-    gpio_config_t io_conf;
-    io_conf.intr_type = GPIO_INTR_DISABLE;       // Disable GPIO interrupts
-    io_conf.mode = GPIO_MODE_INPUT;              // Set as Input mode
-    io_conf.pin_bit_mask = (1ULL << PIN_IS2_SD); // Bit mask of the pin
-    io_conf.pull_down_en = GPIO_PULLDOWN_ENABLE; // Enable pull-down resistor
-    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;    // Disable pull-up resistor
-    gpio_config(&io_conf);
-  }
-
 } // namespace
 
 void i2s_audio_init()
@@ -151,14 +123,18 @@ void i2s_audio_exit_light_sleep()
 
 size_t i2s_read_raw_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
 {
-
   size_t bytes_read = 0;
   esp_err_t err = i2s_channel_read(g_i2s_context.rx_chan, buffer, sizeof(buffer), &bytes_read, 0);
   if (err == ESP_OK)
   {
     if (bytes_read > 0)
     {
-      // cout << "Bytes read: " << bytes_read << endl;
+      for (size_t i = 0; i < bytes_read / sizeof(audio_sample_t); i++)
+      {
+        // First 24 bits are significant. But we want 16 bits so
+        // byte shift twice.
+        buffer[i] = buffer[i] >> 16;
+      }
       const size_t count = bytes_read / sizeof(audio_sample_t);
       return count;
     }

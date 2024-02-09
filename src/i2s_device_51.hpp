@@ -146,6 +146,11 @@ size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
         // First 24 bits are significant. Last byte is padding/garbage.
         // But we only want the first 16 bits.
         buffer[i] = s_native_buffer[i] >> 16;
+        // print out the first 10 samples
+        if (i < 10)
+        {
+          Serial.printf("Sample %d: %d\n", i, buffer[i]);
+        }
       }
       return count;
     }

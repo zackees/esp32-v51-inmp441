@@ -89,7 +89,7 @@ void i2s_sleep_test_microphone_distortion() {
       audio_sample_t* begin = &buffer[0];
       audio_sample_t* end = &buffer[bytes_read];
       int32_t vol = max_volume(begin, end);
-      Serial.printf("%d: max-min: %d, %d bytes read\n", diff, vol, bytes_read);
+      Serial.printf("%d: max-min: %d, %d samples read\n", diff, vol, bytes_read);
     }
   }
   Serial.printf("Now entering light sleep\n");

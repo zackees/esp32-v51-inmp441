@@ -149,7 +149,7 @@ size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
         // print out the first 10 samples
         if (i < 10)
         {
-          Serial.printf("Sample %d: %d\n", i, buffer[i]);
+          Serial.printf("Sample %d: %d\n", i, s_native_buffer[i]);
         }
       }
       return count;

@@ -213,9 +213,9 @@ namespace
     /* RX channel will be registered on our second I2S (for now)*/
     i2s_chan_config_t rx_chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
     i2s_new_channel(&rx_chan_cfg, NULL, &rx_chan);
-    i2s_std_config_t std_rx_cfg = {
-        .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(16000),
-        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_32BIT, I2S_SLOT_MODE_STEREO),
+    i2s_std_config_t i2s_chan_cfg_rx = {
+        .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(48000),
+        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_32BIT, I2S_SLOT_MODE_MONO),
         .gpio_cfg = {
             .mclk = I2S_GPIO_UNUSED,
             .bclk = PIN_I2S_SCK,
@@ -224,14 +224,14 @@ namespace
             .din = PIN_IS2_SD,
             .invert_flags = {
                 .mclk_inv = false,
-                .bclk_inv = true,
+                .bclk_inv = false,
                 .ws_inv = false,
             },
         },
     };
-    ESP_ERROR_CHECK(i2s_channel_init_std_mode(rx_chan, &std_rx_cfg));
-    ESP_ERROR_CHECK(i2s_channel_enable(rx_chan));
-    I2SContext ctx = {rx_chan, rx_chan_cfg, std_rx_cfg};
+    //ESP_ERROR_CHECK(i2s_channel_init_std_mode(rx_chan, &std_rx_cfg));
+    //ESP_ERROR_CHECK(i2s_channel_enable(rx_chan));
+    I2SContext ctx = {rx_chan, rx_chan_cfg, i2s_chan_cfg_rx};
     return ctx;
   }
 
@@ -242,16 +242,16 @@ namespace
     i2s_chan_config_t i2s_chan_cfg_rx = {
         .id = I2S_NUM_0,
         .role = I2S_ROLE_MASTER,
-        .dma_desc_num = 6,
-        .dma_frame_num = 240,
+        .dma_desc_num = AUDIO_DMA_BUFFER_COUNT,
+        .dma_frame_num = IS2_AUDIO_BUFFER_LEN,
         .auto_clear = false,
     };
     i2s_std_config_t rx_std_cfg = {
-        .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(48000),
+        .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(16000),
         .slot_cfg = {
                 .data_bit_width = I2S_DATA_BIT_WIDTH_24BIT,
                 .slot_bit_width = I2S_SLOT_BIT_WIDTH_32BIT,
-                .slot_mode = I2S_SLOT_MODE_STEREO,
+                .slot_mode = I2S_SLOT_MODE_MONO,
                 .slot_mask = I2S_STD_SLOT_RIGHT,
                 .ws_width = 32,
                 .ws_pol = false,
@@ -280,7 +280,7 @@ namespace
   void init_i2s_pins()
   {
     //g_i2s_context = get_i2s_context();
-    g_i2s_context = make_inmp441_2();
+    g_i2s_context = make_inmp441_context();
     esp_err_t err = i2s_new_channel(&g_i2s_context.i2s_chan_cfg_rx, NULL, &g_i2s_context.rx_chan);
     ESP_ERROR_CHECK(err);
     err = i2s_channel_init_std_mode(g_i2s_context.rx_chan, &g_i2s_context.i2s_std_cfg_rx);

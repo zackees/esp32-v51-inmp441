@@ -37,6 +37,7 @@ void setup()
 {
   // initialize digital pin LED_BUILTIN as an output.
   // pinMode(LED_BUILTIN, OUTPUT);
+  delay(1000);
   Serial.begin(115200);
   i2s_audio_init();
 
@@ -103,7 +104,7 @@ void i2s_sleep_test_microphone_distortion() {
       audio_sample_t* low = std::min_element(begin, end);
       audio_sample_t* high = std::max_element(begin, end);
       audio_sample_t vol = *high - *low;
-      Serial.printf("%d: max-min: %d, %d bytes read\n", diff, vol, bytes_read);
+      Serial.printf("%d: max-min: %d, %d samples read\n", diff, vol, bytes_read);
     }
   }
 }

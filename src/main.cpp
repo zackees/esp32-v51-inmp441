@@ -29,9 +29,20 @@
 #include "main.h"
 #include "defs.h"
 #include "i2s_device.h"
+#include "esp_pm.h"
 
 #define SLEEP_TIME_MS 1
 #define ENABLE_SLEEP 1
+
+esp_pm_lock_handle_t apb_lock;
+
+void acquire_apb_power_lock() {
+  esp_err_t err = esp_pm_lock_create(
+    ESP_PM_APB_FREQ_MAX,
+    0,
+    "i2s-apb-lock",
+    &apb_lock);
+}
 
 void setup()
 {
@@ -40,6 +51,8 @@ void setup()
   delay(1000);
   Serial.begin(115200);
   i2s_audio_init();
+
+  acquire_apb_power_lock();
 
   // set alarm to fire every 0.1 second
   cout << "Initialized\n";

@@ -103,8 +103,12 @@ void i2s_sleep_test_microphone_distortion() {
       audio_sample_t* end = &buffer[bytes_read];
       audio_sample_t* low = std::min_element(begin, end);
       audio_sample_t* high = std::max_element(begin, end);
-      audio_sample_t vol = *high - *low;
-      Serial.printf("%d: max-min: %d, %d samples read\n", diff, vol, bytes_read);
+      //Serial.printf("max: %d, min: %d\n", *high, *low);
+      std::cout << "max: " << *high << ", min: " << *low << std::endl;
+      audio_sample_t vol = *high;
+      vol -= *low;
+      //Serial.printf("%d: max-min: %d, %d samples read\n", diff, vol, bytes_read);
+      std::cout << diff << ": max-min: " << vol << ", " << bytes_read << " samples read" << std::endl;
     }
   }
 }

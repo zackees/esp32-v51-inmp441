@@ -29,7 +29,7 @@ namespace
     i2s_std_config_t i2s_std_cfg_rx;
   };
 
-  I2SContext g_i2s_context;
+
   I2SContext make_inmp441_context() {
     I2SContext ctx;
     i2s_chan_handle_t rx_chan = NULL;
@@ -70,11 +70,12 @@ namespace
     ctx = {rx_chan, i2s_chan_cfg_rx, rx_std_cfg};
     return ctx;
   }
+  
+  I2SContext g_i2s_context = make_inmp441_context();
 
   void init_i2s_pins()
   {
     //g_i2s_context = get_i2s_context();
-    g_i2s_context = make_inmp441_context();
     esp_err_t err = i2s_new_channel(&g_i2s_context.i2s_chan_cfg_rx, NULL, &g_i2s_context.rx_chan);
     ESP_ERROR_CHECK(err);
     err = i2s_channel_init_std_mode(g_i2s_context.rx_chan, &g_i2s_context.i2s_std_cfg_rx);

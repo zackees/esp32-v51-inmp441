@@ -31,7 +31,7 @@
 #include "i2s_device.h"
 #include "esp_pm.h"
 
-#define SLEEP_TIME_MS 1
+#define SLEEP_TIME_MS 1000
 #define ENABLE_SLEEP 1
 
 esp_pm_lock_handle_t apb_lock;

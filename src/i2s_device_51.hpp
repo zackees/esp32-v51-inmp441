@@ -64,7 +64,7 @@ namespace
                 .din  = PIN_IS2_SD,
                 .invert_flags = {
                         .mclk_inv = false,
-                        .bclk_inv = true,
+                        .bclk_inv = false,
                         .ws_inv   = false,
                 },
         },
@@ -115,6 +115,7 @@ void i2s_audio_enter_light_sleep()
   // hold pin engaged
   digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone.
   gpio_hold_en(PIN_AUDIO_PWR);
+  i2s_channel_disable(s_i2s_context.rx_chan);
   // i2s_stop(I2S_NUM_0);
   // i2s_driver_uninstall(I2S_NUM_0);
 }
@@ -125,6 +126,7 @@ void i2s_audio_exit_light_sleep()
 
   // i2s_start(I2S_NUM_0);
   // i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
+  i2s_channel_enable(s_i2s_context.rx_chan);
 }
 
 

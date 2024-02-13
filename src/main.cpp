@@ -31,6 +31,8 @@
 #include "i2s_device.h"
 #include "esp_pm.h"
 
+#include "pseudo_i2s.h"
+
 #define SLEEP_TIME_MS 1000
 #define ENABLE_SLEEP 1
 
@@ -66,6 +68,7 @@ void my_light_sleep(uint32_t duration_ms) {
   }
   //i2s_audio_shutdown();
   i2s_audio_enter_light_sleep();
+  pseudo_i2s_start();
   err = esp_light_sleep_start();
   if (err != ESP_OK) {
     if (err == ESP_ERR_SLEEP_REJECT) {
@@ -74,6 +77,7 @@ void my_light_sleep(uint32_t duration_ms) {
       Serial.printf("Light sleep failed: %d\n", err);
     }
   }
+  pseudo_i2s_stop();
   i2s_audio_exit_light_sleep();
   //i2s_audio_init();
   #else

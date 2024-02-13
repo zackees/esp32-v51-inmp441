@@ -24,7 +24,7 @@
 #define LEDC_FULL_DUTY (16383)            // Set duty to 100%. ((2 ** 14) - 1) = 16383
 #define LEDC_FREQUENCY (1024*5)           // Frequency in Hertz. Set frequency at ~5 kHz
 
-#define PIN_PSUEDO_I2S GPIO_NUM_21
+#define PIN_PSUEDO_I2S GPIO_NUM_5
 #define LEDC_CLOCK LEDC_USE_RC_FAST_CLK  // still clocks during light sleep.
 
 
@@ -44,7 +44,7 @@ namespace
       .gpio_num = PIN_PSUEDO_I2S,
       .speed_mode = LEDC_MODE,
       .channel = LEDC_CHANNEL,
-      .intr_type = LEDC_INTR_DISABLE,
+      .intr_type = LEDC_INTR_FADE_END,
       .timer_sel = LEDC_TIMER,
       .duty = 1,
       .hpoint = 2};

@@ -120,6 +120,8 @@ void i2s_audio_enter_light_sleep()
   // i2s_driver_uninstall(I2S_NUM_0);
 }
 
+
+
 void i2s_audio_exit_light_sleep()
 {
   // digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone.

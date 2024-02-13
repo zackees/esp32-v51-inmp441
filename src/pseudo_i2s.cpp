@@ -25,16 +25,8 @@
 #define LEDC_FREQUENCY (1024*5)           // Frequency in Hertz. Set frequency at ~5 kHz
 
 #define PIN_PSUEDO_I2S PIN_I2S_SCK
+#define LEDC_CLOCK LEDC_USE_RC_FAST_CLK  // still clocks during light sleep.
 
-// #define ENABLE_SLEEP_COMPATIBLE_LEDC
-
-// #define USE_LIGHTSLEEP_COMPATIBLE_LEDC 1
-
-#if USE_LIGHTSLEEP_COMPATIBLE_LEDC
-#define LEDC_CLOCK LEDC_USE_RC_FAST_CLK
-#else
-#define LEDC_CLOCK LEDC_USE_RC_FAST_CLK
-#endif
 
 namespace
 {

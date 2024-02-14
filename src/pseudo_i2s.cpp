@@ -22,7 +22,7 @@
 #define LEDC_DUTY_RES LEDC_TIMER_2_BIT // Set duty resolution to 13 bits
 //#define LEDC_DUTY (4095)                // Set duty to 50%. ((2 ** 13) - 1) * 50% = 4095
 #define LEDC_FULL_DUTY (16383)            // Set duty to 100%. ((2 ** 14) - 1) = 16383
-#define LEDC_FREQUENCY (1024*5)           // Frequency in Hertz. Set frequency at ~5 kHz
+#define LEDC_FREQUENCY (1024*200)           // Frequency in Hertz. Set frequency at ~200 kHz
 
 #define PIN_PSUEDO_I2S GPIO_NUM_5
 #define LEDC_CLOCK LEDC_USE_RC_FAST_CLK  // still clocks during light sleep.

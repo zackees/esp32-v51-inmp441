@@ -55,6 +55,7 @@ void setup()
   i2s_audio_init();
 
   acquire_apb_power_lock();
+  //pseudo_i2s_start();
 
   // set alarm to fire every 0.1 second
   cout << "Initialized\n";
@@ -137,9 +138,11 @@ void i2s_sleep_test_microphone_distortion() {
 // the loop function runs over and over again forever
 void loop()
 {
-  // i2s_sleep_test_microphone_distortion();
   pseudo_i2s_start();
+  delay(2000);
+  // i2s_sleep_test_microphone_distortion();
   while (1) {
-    // my_light_sleep(SLEEP_TIME_MS);
+    my_light_sleep(SLEEP_TIME_MS);
+    delay(SLEEP_TIME_MS);
   }
 }

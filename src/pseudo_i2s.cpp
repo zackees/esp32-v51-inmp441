@@ -11,20 +11,25 @@
 #include "defs.h"
 #include "pseudo_i2s.h"
 
+// #include /Users/niteris/.platformio/packages/framework-arduinoespressif32@src-cba3def1496a47e6af73c0b73bd2e13c/cores/esp32/esp32-hal-ledc.c
+#include "esp32-hal-ledc.h"
+///Users/niteris/.platformio/packages/framework-arduinoespressif32@src-cba3def1496a47e6af73c0b73bd2e13c/cores/esp32/esp32-hal-periman.h
+#include "esp32-hal-periman.h"
+
 #define MAX_8BIT 255
 #define MAX_16BIT 65535
 #define MAX_LED_VALUE ((1 << LED_PWM_RESOLUTION) - 1)
 
 
-#define LEDC_TIMER LEDC_TIMER_0
+#define LEDC_TIMER LEDC_TIMER_1
 #define LEDC_MODE LEDC_LOW_SPEED_MODE
 #define LEDC_CHANNEL LEDC_CHANNEL_1
 #define LEDC_DUTY_RES LEDC_TIMER_2_BIT // Set duty resolution to 13 bits
 //#define LEDC_DUTY (4095)                // Set duty to 50%. ((2 ** 13) - 1) * 50% = 4095
 #define LEDC_FULL_DUTY (16383)            // Set duty to 100%. ((2 ** 14) - 1) = 16383
-#define LEDC_FREQUENCY (1024*200)           // Frequency in Hertz. Set frequency at ~200 kHz
+#define LEDC_FREQUENCY (1024*100)           // Frequency in Hertz. Set frequency at ~200 kHz
 
-#define PIN_PSUEDO_I2S GPIO_NUM_5
+#define PIN_PSUEDO_I2S GPIO_NUM_6
 #define LEDC_CLOCK LEDC_USE_RC_FAST_CLK  // still clocks during light sleep.
 
 
@@ -49,19 +54,47 @@ namespace
       .duty = 1,
       .hpoint = 2,
       .flags = {
-        .output_invert = 0,
+        .output_invert = 1,
       }
   };
+
+
+
+static uint8_t analog_resolution = 8;
+static int analog_frequency = 50000;
+void myAnalogWrite(uint8_t pin, int value) {
+  // Use ledc hardware for internal pins
+  if (pin < SOC_GPIO_PIN_COUNT) {
+    ledc_channel_handle_t *bus = (ledc_channel_handle_t*)perimanGetPinBus(pin, ESP32_BUS_TYPE_LEDC);
+    if(bus == NULL && perimanClearPinBus(pin)){
+        if(ledcAttach(pin, analog_frequency, analog_resolution) == 0){
+            log_e("analogWrite setup failed (freq = %u, resolution = %u). Try setting different resolution or frequency");
+            return;
+        }
+    }
+    ledcWrite(pin, value);
+  }
+}
+
 } // namespace
+
+
 
 void pseudo_i2s_start()
 {
+  myAnalogWrite(PIN_PSUEDO_I2S, 127);
+  return;
+  //return;
   // Prepare and then apply the LEDC PWM timer configuration
   ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
   ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
+  //ESP_ERROR_CHECK(ledc_fade_func_install(0));
+  ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_FULL_DUTY/2));
+  ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
 }
 
 void pseudo_i2s_stop()
 {
-  ESP_ERROR_CHECK(ledc_stop(LEDC_MODE, LEDC_CHANNEL, 0));
+  //return;
+  //ESP_ERROR_CHECK(ledc_stop(LEDC_MODE, LEDC_CHANNEL, 0));
 }

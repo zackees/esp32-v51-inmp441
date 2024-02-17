@@ -25,19 +25,18 @@
 #define LEDC_FREQUENCY (1024*200)           // Frequency in Hertz. Set frequency at ~200 kHz
 
 #define PIN_PSUEDO_I2S GPIO_NUM_5
-#define LEDC_CLOCK LEDC_USE_RC_FAST_CLK  // still clocks during light sleep.
+#define LEDC_CLOCK LEDC_USE_RTC8M_CLK // still clocks during light sleep.
 
 
 namespace
 {
   ledc_timer_config_t ledc_timer = {
-      //.duty_resolution  = LEDC_TIMER_13_BIT, // resolution of PWM duty
-      .speed_mode = LEDC_MODE,
-      .duty_resolution = LEDC_DUTY_RES,
-      .timer_num = LEDC_TIMER,
-      .freq_hz = LEDC_FREQUENCY, // Set output frequency
-      .clk_cfg = LEDC_CLOCK
-    };
+      .speed_mode = LEDC_LOW_SPEED_MODE,
+      .duty_resolution = LEDC_TIMER_13_BIT,
+      .timer_num = LEDC_TIMER_0,
+      .freq_hz = 5000,
+      .clk_cfg = LEDC_USE_RTC8M_CLK,
+  };
 
   // Prepare and then apply the LEDC PWM channel configuration
   ledc_channel_config_t ledc_channel = {

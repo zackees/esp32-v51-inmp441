@@ -33,7 +33,7 @@
 
 #include "pseudo_i2s.h"
 
-#define SLEEP_TIME_MS 1000
+#define SLEEP_TIME_MS 2000
 #define ENABLE_SLEEP 1
 
 esp_pm_lock_handle_t apb_lock;
@@ -52,9 +52,10 @@ void setup()
   // pinMode(LED_BUILTIN, OUTPUT);
   delay(1000);
   Serial.begin(115200);
-  i2s_audio_init();
+  //i2s_audio_init();
 
-  acquire_apb_power_lock();
+  //acquire_apb_power_lock();
+  esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_ON);
   //pseudo_i2s_start();
 
   // set alarm to fire every 0.1 second
@@ -62,15 +63,20 @@ void setup()
 }
 
 void my_light_sleep(uint32_t duration_ms) {
+  std::cout << "my_light_sleep\n";
   #if ENABLE_SLEEP
   esp_err_t err = esp_sleep_enable_timer_wakeup(duration_ms * 1000);
+  std::cout << "esp_sleep_enable_timer_wakeup: " << err << std::endl;
   if (err != ESP_OK) {
     Serial.printf("Light sleep failed: %d\n", err);
   }
   //i2s_audio_shutdown();
-  i2s_audio_enter_light_sleep();
-  pseudo_i2s_start();
+  //i2s_audio_enter_light_sleep();
+  //pseudo_i2s_start();
+  std::cout << "esp_light_sleep_start: " << err << std::endl;
   err = esp_light_sleep_start();
+  std::cout << "esp_light_sleep_exited: " << err << std::endl;
+
   if (err != ESP_OK) {
     if (err == ESP_ERR_SLEEP_REJECT) {
       Serial.printf("Light sleep failed: rejected\n");
@@ -78,8 +84,8 @@ void my_light_sleep(uint32_t duration_ms) {
       Serial.printf("Light sleep failed: %d\n", err);
     }
   }
-  pseudo_i2s_stop();
-  i2s_audio_exit_light_sleep();
+  //pseudo_i2s_stop();
+  //i2s_audio_exit_light_sleep();
   //i2s_audio_init();
   #else
   Serial.printf("Light sleep disabled\n");
@@ -143,6 +149,9 @@ void loop()
   // i2s_sleep_test_microphone_distortion();
   while (1) {
     my_light_sleep(SLEEP_TIME_MS);
+    //pseudo_i2s_start();
     delay(SLEEP_TIME_MS);
+    //digitalWrite(PIN_PSUEDO_I2S, LOW);   // turn the LED on (HIGH is the voltage level)
+    //delay(SLEEP_TIME_MS);                       // wait for a second
   }
 }

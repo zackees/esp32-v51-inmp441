@@ -47,7 +47,11 @@ namespace
       .intr_type = LEDC_INTR_FADE_END,
       .timer_sel = LEDC_TIMER,
       .duty = 1,
-      .hpoint = 2};
+      .hpoint = 2,
+      .flags = {
+        .output_invert = 0,
+      }
+  };
 } // namespace
 
 void pseudo_i2s_start()

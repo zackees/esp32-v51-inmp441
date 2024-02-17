@@ -137,5 +137,9 @@ void i2s_sleep_test_microphone_distortion() {
 // the loop function runs over and over again forever
 void loop()
 {
-  i2s_sleep_test_microphone_distortion();
+  // i2s_sleep_test_microphone_distortion();
+  pseudo_i2s_start();
+  while (1) {
+    // my_light_sleep(SLEEP_TIME_MS);
+  }
 }

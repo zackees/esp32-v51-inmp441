@@ -158,6 +158,7 @@ void loop()
     pseudo_i2s_start();
     my_light_sleep(SLEEP_TIME_MS);
     pseudo_i2s_stop();
+    digitalWrite(LED_BUILTIN, PIN_PSUEDO_I2S);   // turn the LED on (HIGH is the voltage level)
     Serial.println("woke up");
     std::flush(std::cout);
     delay(250);

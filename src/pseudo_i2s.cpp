@@ -21,8 +21,8 @@ during main mcu sleep.
 #define LEDC_TIMER LEDC_TIMER_0
 #define LEDC_MODE LEDC_LOW_SPEED_MODE
 #define LEDC_CHANNEL LEDC_CHANNEL_0
-#define LEDC_DUTY_RES LEDC_TIMER_4_BIT // Set duty resolution to 13 bits
-#define LEDC_FREQUENCY (1024)           // Frequency in Hertz. Set frequency at 5 kHz
+#define LEDC_DUTY_RES LEDC_TIMER_1_BIT // Set duty resolution to 13 bits
+#define LEDC_FREQUENCY (1024 * 1024)           // Frequency in Hertz. Set frequency at 5 kHz
 #define PIN_PSUEDO_I2S GPIO_NUM_6
 
 // #define LEDC_CLOCK LEDC_USE_RC_FAST_CLK  // still clocks during light sleep.
@@ -33,7 +33,7 @@ namespace
   enum {
     // use bith manipuation against the LEDC_TIMER_8_BIT to come to a max duty.
     // For example, if LEDC_TIMER_8_BIT is 8, then the max duty is 255.
-    kMaxDuty = (1 << LEDC_TIMER_8_BIT) - 1,
+    kMaxDuty = (1 << LEDC_DUTY_RES) - 1,
   };
   ledc_timer_config_t ledc_timer = {
       //.duty_resolution  = LEDC_TIMER_13_BIT, // resolution of PWM duty
@@ -49,7 +49,7 @@ namespace
       .gpio_num = PIN_PSUEDO_I2S,
       .speed_mode = LEDC_MODE,
       .channel = LEDC_CHANNEL,
-      .intr_type = LEDC_INTR_FADE_END,
+      .intr_type = LEDC_INTR_DISABLE,
       .timer_sel = LEDC_TIMER,
       .duty = 0,
       .hpoint = 0,
@@ -70,7 +70,7 @@ void pseudo_i2s_start()
   // Prepare and then apply the LEDC PWM timer configuration
   ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
   ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
-  ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, kMaxDuty / 2));
+  ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, 1));
   std::cout << "pseudo_i2s_start done\n";
   std::flush(std::cout);
   ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));

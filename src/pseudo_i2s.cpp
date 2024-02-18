@@ -79,6 +79,15 @@ void pseudo_i2s_start()
 
 void pseudo_i2s_stop()
 {
-  //return;
-  //ESP_ERROR_CHECK(ledc_stop(LEDC_MODE, LEDC_CHANNEL, 0));
+  std::cout << "pseudo_i2s_stop\n";
+  std::flush(std::cout);
+  ESP_ERROR_CHECK(ledc_stop(LEDC_MODE, LEDC_CHANNEL, 0));
+  std::cout << "pseudo_i2s_stop done\n";
+  std::flush(std::cout);
+  //ESP_ERROR_CHECK(ledc_uninstall());
+  std::cout << "pseudo_i2s_stop done\n";
+  std::flush(std::cout);
+  //ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S));
+  std::cout << "pseudo_i2s_stop done\n";
+  std::flush(std::cout);
 }

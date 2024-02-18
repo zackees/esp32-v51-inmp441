@@ -155,7 +155,9 @@ void loop()
   while (1) {
     Serial.println("about to sleep");
     std::flush(std::cout);
+    pseudo_i2s_start();
     my_light_sleep(SLEEP_TIME_MS);
+    pseudo_i2s_stop();
     Serial.println("woke up");
     std::flush(std::cout);
     delay(250);

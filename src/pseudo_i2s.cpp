@@ -35,6 +35,11 @@ during main mcu sleep.
 
 namespace
 {
+  enum {
+    // use bith manipuation against the LEDC_TIMER_8_BIT to come to a max duty.
+    // For example, if LEDC_TIMER_8_BIT is 8, then the max duty is 255.
+    kMaxDuty = (1 << LEDC_TIMER_8_BIT) - 1,
+  };
   ledc_timer_config_t ledc_timer = {
       //.duty_resolution  = LEDC_TIMER_13_BIT, // resolution of PWM duty
       .speed_mode = LEDC_MODE,
@@ -69,7 +74,7 @@ void pseudo_i2s_start()
   // Prepare and then apply the LEDC PWM timer configuration
   ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
   ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
-  ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, 128));
+  ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, kMaxDuty / 2));
   std::cout << "pseudo_i2s_start done\n";
   std::flush(std::cout);
   ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
@@ -79,15 +84,6 @@ void pseudo_i2s_start()
 
 void pseudo_i2s_stop()
 {
-  std::cout << "pseudo_i2s_stop\n";
-  std::flush(std::cout);
   ESP_ERROR_CHECK(ledc_stop(LEDC_MODE, LEDC_CHANNEL, 0));
-  std::cout << "pseudo_i2s_stop done\n";
-  std::flush(std::cout);
-  //ESP_ERROR_CHECK(ledc_uninstall());
-  std::cout << "pseudo_i2s_stop done\n";
-  std::flush(std::cout);
-  //ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S));
-  std::cout << "pseudo_i2s_stop done\n";
-  std::flush(std::cout);
+  pinMode(PIN_PSUEDO_I2S, INPUT);
 }

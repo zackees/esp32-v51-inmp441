@@ -14,7 +14,7 @@
 // #include /Users/niteris/.platformio/packages/framework-arduinoespressif32@src-cba3def1496a47e6af73c0b73bd2e13c/cores/esp32/esp32-hal-ledc.c
 #include "esp32-hal-ledc.h"
 ///Users/niteris/.platformio/packages/framework-arduinoespressif32@src-cba3def1496a47e6af73c0b73bd2e13c/cores/esp32/esp32-hal-periman.h
-#include "esp32-hal-periman.h"
+//#include "esp32-hal-periman.h"
 
 #define MAX_8BIT 255
 #define MAX_16BIT 65535
@@ -30,8 +30,8 @@
 #define LEDC_FREQUENCY (1024)           // Frequency in Hertz. Set frequency at 5 kHz
 
 
-#define LEDC_CLOCK LEDC_USE_RC_FAST_CLK  // still clocks during light sleep.
-
+// #define LEDC_CLOCK LEDC_USE_RC_FAST_CLK  // still clocks during light sleep.
+#define LEDC_CLOCK LEDC_USE_RTC8M_CLK  // still clocks during light sleep.
 
 namespace
 {
@@ -59,7 +59,7 @@ namespace
   };
 
 
-
+#if 0
 static uint8_t analog_resolution = 8;
 static int analog_frequency = 5000;
 void myAnalogWrite(uint8_t pin, int value) {
@@ -75,6 +75,7 @@ void myAnalogWrite(uint8_t pin, int value) {
     ledcWrite(pin, value);
   }
 }
+#endif
 
 } // namespace
 

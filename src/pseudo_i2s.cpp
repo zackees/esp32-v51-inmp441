@@ -22,7 +22,7 @@ during main mcu sleep.
 #define LEDC_MODE LEDC_LOW_SPEED_MODE
 #define LEDC_CHANNEL LEDC_CHANNEL_0
 #define LEDC_DUTY_RES LEDC_TIMER_1_BIT // Set duty resolution to 13 bits
-#define LEDC_FREQUENCY (1024 * 1024)           // Frequency in Hertz. Set frequency at 5 kHz
+#define LEDC_FREQUENCY (1024 * 1024)  // 1 mhz clock.
 #define PIN_PSUEDO_I2S GPIO_NUM_6
 
 // #define LEDC_CLOCK LEDC_USE_RC_FAST_CLK  // still clocks during light sleep.

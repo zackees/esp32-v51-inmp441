@@ -18,15 +18,10 @@ during main mcu sleep.
 
 #include "esp32-hal-ledc.h"
 
-#define MAX_8BIT 255
-#define MAX_16BIT 65535
-#define MAX_LED_VALUE ((1 << LED_PWM_RESOLUTION) - 1)
-
-
 #define LEDC_TIMER LEDC_TIMER_0
 #define LEDC_MODE LEDC_LOW_SPEED_MODE
 #define LEDC_CHANNEL LEDC_CHANNEL_0
-#define LEDC_DUTY_RES LEDC_TIMER_8_BIT // Set duty resolution to 13 bits
+#define LEDC_DUTY_RES LEDC_TIMER_4_BIT // Set duty resolution to 13 bits
 #define LEDC_FREQUENCY (1024)           // Frequency in Hertz. Set frequency at 5 kHz
 #define PIN_PSUEDO_I2S GPIO_NUM_6
 

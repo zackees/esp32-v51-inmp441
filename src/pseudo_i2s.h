@@ -4,8 +4,6 @@
 
 #include <Arduino.h>
 
-#define PIN_PSUEDO_I2S GPIO_NUM_6
-
 void pseudo_i2s_start();
 void pseudo_i2s_stop();
 

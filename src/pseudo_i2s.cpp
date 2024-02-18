@@ -24,13 +24,13 @@
 #define LEDC_TIMER LEDC_TIMER_0
 #define LEDC_MODE LEDC_LOW_SPEED_MODE
 #define LEDC_CHANNEL LEDC_CHANNEL_0
-#define LEDC_DUTY_RES LEDC_TIMER_11_BIT // Set duty resolution to 13 bits
+#define LEDC_DUTY_RES LEDC_TIMER_8_BIT // Set duty resolution to 13 bits
 //#define LEDC_DUTY (4095)                // Set duty to 50%. ((2 ** 13) - 1) * 50% = 4095
 #define LEDC_FULL_DUTY (16383)            // Set duty to 100%. ((2 ** 14) - 1) = 16383
 #define LEDC_FREQUENCY (1024)           // Frequency in Hertz. Set frequency at 5 kHz
 
-#define PIN_PSUEDO_I2S GPIO_NUM_6
-#define LEDC_CLOCK LEDC_USE_XTAL_CLK  // still clocks during light sleep.
+
+#define LEDC_CLOCK LEDC_USE_RC_FAST_CLK  // still clocks during light sleep.
 
 
 namespace
@@ -85,11 +85,15 @@ void pseudo_i2s_start()
   //rtc_clk_slow_freq_set(RTC_SLOW_FREQ_8MD256);
   std::cout << "pseudo_i2s_start\n";
   std::flush(std::cout);
+  ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S));
   //pinMode(PIN_PSUEDO_I2S, OUTPUT);
   //digitalWrite(PIN_PSUEDO_I2S, HIGH);
+  //analogWrite(PIN_PSUEDO_I2S, 127);
   //return;
-  myAnalogWrite(PIN_PSUEDO_I2S, 127);
-  return;
+  //return;
+
+  //myAnalogWrite(PIN_PSUEDO_I2S, 127);
+  //return;
 
   //return;
   // Prepare and then apply the LEDC PWM timer configuration

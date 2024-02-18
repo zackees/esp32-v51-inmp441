@@ -54,7 +54,7 @@ void setup()
   Serial.begin(115200);
   i2s_audio_init();
 
-  acquire_apb_power_lock();
+  //acquire_apb_power_lock();
 
   // set alarm to fire every 0.1 second
   cout << "Initialized\n";
@@ -66,9 +66,6 @@ void my_light_sleep(uint32_t duration_ms) {
   if (err != ESP_OK) {
     Serial.printf("Light sleep failed: %d\n", err);
   }
-  //i2s_audio_shutdown();
-  i2s_audio_enter_light_sleep();
-  pseudo_i2s_start();
   err = esp_light_sleep_start();
   if (err != ESP_OK) {
     if (err == ESP_ERR_SLEEP_REJECT) {
@@ -77,11 +74,6 @@ void my_light_sleep(uint32_t duration_ms) {
       Serial.printf("Light sleep failed: %d\n", err);
     }
   }
-  pseudo_i2s_stop();
-  i2s_audio_exit_light_sleep();
-  //i2s_audio_init();
-  #else
-  Serial.printf("Light sleep disabled\n");
   #endif
 }
 
@@ -141,5 +133,7 @@ void loop()
   pseudo_i2s_start();
   while (1) {
     // my_light_sleep(SLEEP_TIME_MS);
+    my_light_sleep(SLEEP_TIME_MS);
+    delay(SLEEP_TIME_MS);
   }
 }

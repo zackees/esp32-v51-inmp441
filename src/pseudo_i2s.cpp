@@ -32,7 +32,7 @@ namespace
 {
   ledc_timer_config_t ledc_timer = {
       .speed_mode = LEDC_LOW_SPEED_MODE,
-      .duty_resolution = LEDC_TIMER_13_BIT,
+      .duty_resolution = LEDC_TIMER_8_BIT,
       .timer_num = LEDC_TIMER_0,
       .freq_hz = 5000,
       .clk_cfg = LEDC_USE_RTC8M_CLK,
@@ -43,7 +43,7 @@ namespace
       .gpio_num = PIN_PSUEDO_I2S,
       .speed_mode = LEDC_MODE,
       .channel = LEDC_CHANNEL,
-      .intr_type = LEDC_INTR_FADE_END,
+      .intr_type = LEDC_INTR_DISABLE,
       .timer_sel = LEDC_TIMER,
       .duty = 1,
       .hpoint = 2,
@@ -58,6 +58,7 @@ void pseudo_i2s_start()
   // Prepare and then apply the LEDC PWM timer configuration
   ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
   ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
+  ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S));
 }
 
 void pseudo_i2s_stop()

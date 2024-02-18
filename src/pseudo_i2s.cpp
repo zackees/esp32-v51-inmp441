@@ -1,4 +1,9 @@
-
+/*
+Due to a glitch in the INMP441 hardware, we have to keep the I2S clock running during
+sleep or else the microphone will mix in noise for ~100ms.
+This module use the LEDC PWM to keep the INMP441 clock running (preventing INMP441 sleep)
+during main mcu sleep.
+*/
 
 #include <math.h>
 #include <Arduino.h>
@@ -11,10 +16,7 @@
 #include "defs.h"
 #include "pseudo_i2s.h"
 
-// #include /Users/niteris/.platformio/packages/framework-arduinoespressif32@src-cba3def1496a47e6af73c0b73bd2e13c/cores/esp32/esp32-hal-ledc.c
 #include "esp32-hal-ledc.h"
-///Users/niteris/.platformio/packages/framework-arduinoespressif32@src-cba3def1496a47e6af73c0b73bd2e13c/cores/esp32/esp32-hal-periman.h
-//#include "esp32-hal-periman.h"
 
 #define MAX_8BIT 255
 #define MAX_16BIT 65535
@@ -25,7 +27,6 @@
 #define LEDC_MODE LEDC_LOW_SPEED_MODE
 #define LEDC_CHANNEL LEDC_CHANNEL_0
 #define LEDC_DUTY_RES LEDC_TIMER_8_BIT // Set duty resolution to 13 bits
-//#define LEDC_DUTY (4095)                // Set duty to 50%. ((2 ** 13) - 1) * 50% = 4095
 #define LEDC_FREQUENCY (1024)           // Frequency in Hertz. Set frequency at 5 kHz
 
 
@@ -58,8 +59,6 @@ namespace
   };
 
 } // namespace
-
-
 
 void pseudo_i2s_start()
 {

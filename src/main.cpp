@@ -151,8 +151,11 @@ void loop()
   //esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_OFF);
   // RTC fast
 
+  uint32_t count = 0;
+
   pseudo_i2s_start();
   while (1) {
+    Serial.printf("loop: %d\n", count);
     Serial.println("about to sleep");
     std::flush(std::cout);
     pseudo_i2s_start();
@@ -162,5 +165,6 @@ void loop()
     Serial.println("woke up");
     std::flush(std::cout);
     delay(250);
+    count++;
   }
 }

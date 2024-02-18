@@ -26,7 +26,6 @@
 #define LEDC_CHANNEL LEDC_CHANNEL_0
 #define LEDC_DUTY_RES LEDC_TIMER_8_BIT // Set duty resolution to 13 bits
 //#define LEDC_DUTY (4095)                // Set duty to 50%. ((2 ** 13) - 1) * 50% = 4095
-#define LEDC_FULL_DUTY (16383)            // Set duty to 100%. ((2 ** 14) - 1) = 16383
 #define LEDC_FREQUENCY (1024)           // Frequency in Hertz. Set frequency at 5 kHz
 
 
@@ -58,25 +57,6 @@ namespace
       }
   };
 
-
-#if 0
-static uint8_t analog_resolution = 8;
-static int analog_frequency = 5000;
-void myAnalogWrite(uint8_t pin, int value) {
-  // Use ledc hardware for internal pins
-  if (pin < SOC_GPIO_PIN_COUNT) {
-    ledc_channel_handle_t *bus = (ledc_channel_handle_t*)perimanGetPinBus(pin, ESP32_BUS_TYPE_LEDC);
-    if(bus == NULL && perimanClearPinBus(pin)){
-        if(ledcAttach(pin, analog_frequency, analog_resolution) == 0){
-            log_e("analogWrite setup failed (freq = %u, resolution = %u). Try setting different resolution or frequency");
-            return;
-        }
-    }
-    ledcWrite(pin, value);
-  }
-}
-#endif
-
 } // namespace
 
 
@@ -87,22 +67,9 @@ void pseudo_i2s_start()
   std::cout << "pseudo_i2s_start\n";
   std::flush(std::cout);
   ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S));
-  //pinMode(PIN_PSUEDO_I2S, OUTPUT);
-  //digitalWrite(PIN_PSUEDO_I2S, HIGH);
-  //analogWrite(PIN_PSUEDO_I2S, 127);
-  //return;
-  //return;
-
-  //myAnalogWrite(PIN_PSUEDO_I2S, 127);
-  //return;
-
-  //return;
   // Prepare and then apply the LEDC PWM timer configuration
   ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
   ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
-  //myAnalogWrite(PIN_PSUEDO_I2S, 127);
-  //return;
-  //ESP_ERROR_CHECK(ledc_fade_func_install(0));
   ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, 128));
   std::cout << "pseudo_i2s_start done\n";
   std::flush(std::cout);

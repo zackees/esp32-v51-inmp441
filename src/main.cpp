@@ -55,6 +55,7 @@ void setup()
   //i2s_audio_init();
 
   //acquire_apb_power_lock();
+  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M, ESP_PD_OPTION_ON);
   esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_ON);
   //pseudo_i2s_start();
 
@@ -149,18 +150,14 @@ void loop()
   // pulse the light to let me know it's startup time
   //esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_OFF);
   // RTC fast
-  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M, ESP_PD_OPTION_ON);
+
   pseudo_i2s_start();
-  // i2s_sleep_test_microphone_distortion();
   while (1) {
     Serial.println("about to sleep");
     std::flush(std::cout);
     my_light_sleep(SLEEP_TIME_MS);
     Serial.println("woke up");
     std::flush(std::cout);
-    //pseudo_i2s_start();
     delay(250);
-    //digitalWrite(PIN_PSUEDO_I2S, LOW);   // turn the LED on (HIGH is the voltage level)
-    //delay(SLEEP_TIME_MS);                       // wait for a second
   }
 }

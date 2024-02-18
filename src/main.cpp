@@ -55,8 +55,8 @@ void setup()
   //i2s_audio_init();
 
   //acquire_apb_power_lock();
-  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M, ESP_PD_OPTION_ON);
-  esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_ON);
+
+  //esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_ON);
   //pseudo_i2s_start();
 
   // set alarm to fire every 0.1 second

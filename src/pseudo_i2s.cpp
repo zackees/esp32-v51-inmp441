@@ -70,6 +70,7 @@ void pseudo_i2s_start()
   //rtc_clk_slow_freq_set(RTC_SLOW_FREQ_8MD256);
   std::cout << "pseudo_i2s_start\n";
   std::flush(std::cout);
+  ESP_ERROR_CHECK(esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M, ESP_PD_OPTION_ON));
   ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S)); // Needed for light sleep.
   // Prepare and then apply the LEDC PWM timer configuration
   ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
@@ -80,6 +81,7 @@ void pseudo_i2s_start()
   ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
   std::cout << "pseudo_i2s_start done\n";
   std::flush(std::cout);
+
 }
 
 void pseudo_i2s_stop()

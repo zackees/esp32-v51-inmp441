@@ -65,7 +65,7 @@ namespace
       //.duty_resolution  = LEDC_TIMER_13_BIT, // resolution of PWM duty
       .speed_mode = LEDC_MODE,
       .duty_resolution = LEDC_DUTY_RES,
-      .timer_num = LEDC_TIMER,
+      .timer_num = LEDC_TIMER_1,
       .freq_hz = LEDC_FREQUENCY_WS, // Set output frequency
       .clk_cfg = LEDC_CLOCK
   };
@@ -73,7 +73,7 @@ namespace
   ledc_channel_config_t ledc_channel_ws = {
       .gpio_num = PIN_PSUEDO_I2S_WS,
       .speed_mode = LEDC_MODE,
-      .channel = LEDC_CHANNEL,
+      .channel = LEDC_CHANNEL_1,
       .intr_type = LEDC_INTR_DISABLE,
       .timer_sel = LEDC_TIMER,
       .duty = 0,
@@ -94,10 +94,11 @@ void pseudo_i2s_start()
   ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
 
   // ws pin setup
-  //ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S_WS)); // Needed for light sleep.
-  //ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer_ws));
-  //ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel_ws));
-  //ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, 1));
+  ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S_WS)); // Needed for light sleep.
+  ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer_ws));
+  ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel_ws));
+  ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL_1, 1));
+  ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL_1));
 
 }
 

@@ -30,7 +30,7 @@
 #include "defs.h"
 #include "i2s_device.h"
 #include "esp_pm.h"
-
+#include "bitbang_i2s.h"
 #include "pseudo_i2s.h"
 
 #define SLEEP_TIME_MS 2000
@@ -53,6 +53,7 @@ void setup()
   delay(1000);
   Serial.begin(115200);
   //i2s_audio_init();
+
 
   acquire_apb_power_lock();
   ESP_ERROR_CHECK(esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M, ESP_PD_OPTION_ON));
@@ -251,9 +252,20 @@ void test_audio_and_i2s() {
   }
 }
 
+void test_bitbang_i2s() {
+  bit_bang_setup();
+  while(true) {
+    uint16_t data = 0;
+    bit_bang_get_sample(&data);
+    std::cout << "data: " << data << std::endl;
+  }
+
+}
+
 
 // the loop function runs over and over again forever
 void loop()
 {
-  test_audio_and_i2s();
+  //test_audio_and_i2s();
+  test_bitbang_i2s();
 }

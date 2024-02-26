@@ -54,7 +54,7 @@ void setup()
   Serial.begin(115200);
   //i2s_audio_init();
 
-  //acquire_apb_power_lock();
+  acquire_apb_power_lock();
 
   //esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_ON);
   //pseudo_i2s_start();
@@ -93,12 +93,58 @@ void my_light_sleep(uint32_t duration_ms) {
   #endif
 }
 
+void my_light_sleep2(uint32_t duration_ms) {
+  std::cout << "my_light_sleep\n";
+  #if ENABLE_SLEEP
+  esp_err_t err = esp_sleep_enable_timer_wakeup(duration_ms * 1000);
+  std::cout << "esp_sleep_enable_timer_wakeup: " << err << std::endl;
+  if (err != ESP_OK) {
+    Serial.printf("Light sleep failed: %d\n", err);
+  }
+  //i2s_audio_shutdown();
+  //i2s_audio_enter_light_sleep();
+  pseudo_i2s_start();
+  std::cout << "esp_light_sleep_start: " << err << std::endl;
+  err = esp_light_sleep_start();
+  std::cout << "esp_light_sleep_exited: " << err << std::endl;
+
+  if (err != ESP_OK) {
+    if (err == ESP_ERR_SLEEP_REJECT) {
+      Serial.printf("Light sleep failed: rejected\n");
+    } else {
+      Serial.printf("Light sleep failed: %d\n", err);
+    }
+  }
+  pseudo_i2s_stop();
+  //i2s_audio_exit_light_sleep();
+  //i2s_audio_init();
+  #else
+  Serial.printf("Light sleep disabled\n");
+  #endif
+}
+
 int32_t max_volume(audio_sample_t* begin, audio_sample_t* end) {
   audio_sample_t* low = std::min_element(begin, end);
   audio_sample_t* high = std::max_element(begin, end);
   return int32_t(*high) - *low;
 }
 
+
+void test_microphone_distortion() {
+  uint32_t end_time = millis() + 1000ul;
+  uint32_t start_time = millis();
+  while (millis() < end_time) {
+    audio_buffer_t buffer = {0};
+    size_t bytes_read = i2s_read_samples(buffer);
+    if (bytes_read > 0) {
+      uint32_t diff = millis() - start_time;
+      audio_sample_t* begin = &buffer[0];
+      audio_sample_t* end = &buffer[bytes_read];
+      int32_t vol = max_volume(begin, end);
+      std::cout << "vol: " << vol << std::endl;
+    }
+  }
+}
 
 void i2s_sleep_test_microphone_distortion() {
   // Play test sound for one second, then enter light sleep mode for 1 ms, then output
@@ -142,10 +188,7 @@ void i2s_sleep_test_microphone_distortion() {
   }
 }
 
-// the loop function runs over and over again forever
-void loop()
-{
-
+void test_pseudo_i2s_start() {
   delay(2000);
   // pulse the light to let me know it's startup time
   //esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_OFF);
@@ -159,11 +202,61 @@ void loop()
     Serial.println("about to sleep");
     std::flush(std::cout);
     pseudo_i2s_start();
-    my_light_sleep(SLEEP_TIME_MS);
+    my_light_sleep(2000);
     pseudo_i2s_stop();
     Serial.println("woke up");
     std::flush(std::cout);
     delay(250);
     count++;
   }
+}
+
+
+void test_audio_and_i2s() {
+  delay(2000);
+  // pulse the light to let me know it's startup time
+  //esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_OFF);
+  // RTC fast
+
+  uint32_t count = 0;
+
+  i2s_audio_init();
+  while (1) {
+    Serial.printf("loop: %d\n", count);
+    Serial.println("about to sleep");
+    std::flush(std::cout);
+    //i2s_audio_enter_light_sleep();
+    //i2s_audio_enter_light_sleep();
+    esp_err_t err = esp_sleep_enable_timer_wakeup(500 * 1000);
+    i2s_audio_enter_light_sleep();
+    pseudo_i2s_start();
+    // Turn on built in LED for esp32 c3
+
+
+    std::cout << "esp_light_sleep_start: " << err << std::endl;
+    err = esp_light_sleep_start();
+    std::cout << "esp_light_sleep_exited: " << err << std::endl;
+    if (err != ESP_OK) {
+      if (err == ESP_ERR_SLEEP_REJECT) {
+        Serial.printf("Light sleep failed: rejected\n");
+      } else {
+        Serial.printf("Light sleep failed: %d\n", err);
+      }
+    }
+    pseudo_i2s_stop();
+    i2s_audio_exit_light_sleep();
+    test_microphone_distortion();
+    //i2s_audio_exit_light_sleep();
+    Serial.println("woke up");
+    std::flush(std::cout);
+    delay(1000);
+    count++;
+  }
+}
+
+
+// the loop function runs over and over again forever
+void loop()
+{
+  test_audio_and_i2s();
 }

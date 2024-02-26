@@ -22,7 +22,7 @@ during main mcu sleep.
 #define LEDC_MODE LEDC_LOW_SPEED_MODE
 #define LEDC_CHANNEL LEDC_CHANNEL_0
 #define LEDC_DUTY_RES LEDC_TIMER_1_BIT // Set duty resolution to 13 bits
-#define LEDC_FREQUENCY (1024 * 1024)  // 1 mhz clock.
+#define LEDC_FREQUENCY (1024 * 1500)  // 1 mhz clock.
 #define PIN_PSUEDO_I2S GPIO_NUM_6
 
 // #define LEDC_CLOCK LEDC_USE_RC_FAST_CLK  // still clocks during light sleep.
@@ -63,19 +63,19 @@ namespace
 void pseudo_i2s_start()
 {
   //rtc_clk_slow_freq_set(RTC_SLOW_FREQ_8MD256);
-  std::cout << "pseudo_i2s_start\n";
-  std::flush(std::cout);
+  //std::cout << "pseudo_i2s_start\n";
+  //std::flush(std::cout);
   ESP_ERROR_CHECK(esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M, ESP_PD_OPTION_ON));
   ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S)); // Needed for light sleep.
   // Prepare and then apply the LEDC PWM timer configuration
   ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
   ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
   ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, 1));
-  std::cout << "pseudo_i2s_start done\n";
-  std::flush(std::cout);
+  //std::cout << "pseudo_i2s_start done\n";
+  //std::flush(std::cout);
   ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
-  std::cout << "pseudo_i2s_start done\n";
-  std::flush(std::cout);
+  //std::cout << "pseudo_i2s_start done\n";
+  //std::flush(std::cout);
 
 }
 

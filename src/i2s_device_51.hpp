@@ -136,6 +136,8 @@ void i2s_audio_exit_light_sleep()
   // i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
   // i2s_channel_enable(s_i2s_context.rx_chan);
   //init_i2s_pins();
+  // stop then restart
+  //i2s_stop(I2S_NUM_0);
 }
 
 

@@ -37,7 +37,7 @@ namespace
     // For example, if LEDC_TIMER_8_BIT is 8, then the max duty is 255.
     kMaxDuty = (1 << LEDC_DUTY_RES) - 1,
   };
-  ledc_timer_config_t ledc_timer = {
+  ledc_timer_config_t ledc_timer_sck = {
       //.duty_resolution  = LEDC_TIMER_13_BIT, // resolution of PWM duty
       .speed_mode = LEDC_MODE,
       .duty_resolution = LEDC_DUTY_RES,
@@ -47,7 +47,7 @@ namespace
     };
 
   // Prepare and then apply the LEDC PWM channel configuration
-  ledc_channel_config_t ledc_channel = {
+  ledc_channel_config_t ledc_channel_sck = {
       .gpio_num = PIN_PSUEDO_I2S_SCK,
       .speed_mode = LEDC_MODE,
       .channel = LEDC_CHANNEL,
@@ -70,8 +70,8 @@ void pseudo_i2s_start()
 
   ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S_SCK)); // Needed for light sleep.
   // Prepare and then apply the LEDC PWM timer configuration
-  ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
-  ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
+  ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer_sck));
+  ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel_sck));
   ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, 1));
   //std::cout << "pseudo_i2s_start done\n";
   //std::flush(std::cout);

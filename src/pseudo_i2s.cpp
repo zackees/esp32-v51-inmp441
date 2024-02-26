@@ -23,7 +23,7 @@ during main mcu sleep.
 #define LEDC_CHANNEL LEDC_CHANNEL_0
 #define LEDC_DUTY_RES LEDC_TIMER_1_BIT // Set duty resolution to 13 bits
 #define LEDC_FREQUENCY_SCK (1024 * 2800)  // 1 mhz clock.
-#define LEDC_FREQUENCY_WS ((1024 * 1800) / 32)  // 32 clocks per frame.
+#define LEDC_FREQUENCY_WS ((1024 * 1500) / 32)  // 32 clocks per frame.
 #define PIN_PSUEDO_I2S_SCK GPIO_NUM_6
 
 #define PIN_PSUEDO_I2S_WS GPIO_NUM_21
@@ -57,7 +57,7 @@ namespace
       .duty = 0,
       .hpoint = 0,
       .flags = {
-        .output_invert = 1,
+        .output_invert = 0,
       }
   };
 

@@ -257,8 +257,18 @@ void test_audio_and_i2s() {
 }
 
 
+void test_is2_and_psuedo() {
+  i2s_audio_init();
+  pseudo_i2s_start();
+  while (true) {
+    ;
+  }
+}
+
+
 // the loop function runs over and over again forever
 void loop()
 {
   test_audio_and_i2s();
+  //test_is2_and_psuedo();
 }

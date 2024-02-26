@@ -64,7 +64,7 @@ namespace
   ledc_timer_config_t ledc_timer_ws = {
       //.duty_resolution  = LEDC_TIMER_13_BIT, // resolution of PWM duty
       .speed_mode = LEDC_MODE,
-      .duty_resolution = LEDC_DUTY_RES,
+      .duty_resolution = LEDC_TIMER_4_BIT,
       .timer_num = LEDC_TIMER_1,
       .freq_hz = LEDC_FREQUENCY_WS, // Set output frequency
       .clk_cfg = LEDC_CLOCK
@@ -75,7 +75,7 @@ namespace
       .speed_mode = LEDC_MODE,
       .channel = LEDC_CHANNEL_1,
       .intr_type = LEDC_INTR_DISABLE,
-      .timer_sel = LEDC_TIMER,
+      .timer_sel = LEDC_TIMER_1,
       .duty = 0,
       .hpoint = 0,
       .flags = {
@@ -97,7 +97,7 @@ void pseudo_i2s_start()
   ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S_WS)); // Needed for light sleep.
   ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer_ws));
   ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel_ws));
-  ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL_1, 1));
+  ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL_1, 8));
   ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL_1));
 
 }
@@ -108,4 +108,5 @@ void pseudo_i2s_stop()
   //pinMode(PIN_PSUEDO_I2S_SCK, OUTPUT);
   //digitalWrite(PIN_PSUEDO_I2S_SCK, LOW);
   pinMode(PIN_PSUEDO_I2S_SCK, INPUT);
+  pinMode(PIN_PSUEDO_I2S_WS, INPUT);
 }

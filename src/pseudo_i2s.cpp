@@ -23,7 +23,9 @@ during main mcu sleep.
 #define LEDC_CHANNEL LEDC_CHANNEL_0
 #define LEDC_DUTY_RES LEDC_TIMER_1_BIT // Set duty resolution to 13 bits
 #define LEDC_FREQUENCY (1024 * 1500)  // 1 mhz clock.
-#define PIN_PSUEDO_I2S GPIO_NUM_6
+#define PIN_PSUEDO_I2S_SCK GPIO_NUM_6
+
+#define PIN_PSUEDO_I2S_WS GPIO_NUM_21
 
 // #define LEDC_CLOCK LEDC_USE_RC_FAST_CLK  // still clocks during light sleep.
 #define LEDC_CLOCK LEDC_USE_RTC8M_CLK  // still clocks during light sleep.
@@ -46,7 +48,7 @@ namespace
 
   // Prepare and then apply the LEDC PWM channel configuration
   ledc_channel_config_t ledc_channel = {
-      .gpio_num = PIN_PSUEDO_I2S,
+      .gpio_num = PIN_PSUEDO_I2S_SCK,
       .speed_mode = LEDC_MODE,
       .channel = LEDC_CHANNEL,
       .intr_type = LEDC_INTR_DISABLE,
@@ -65,8 +67,8 @@ void pseudo_i2s_start()
   //rtc_clk_slow_freq_set(RTC_SLOW_FREQ_8MD256);
   //std::cout << "pseudo_i2s_start\n";
   //std::flush(std::cout);
-  ESP_ERROR_CHECK(esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M, ESP_PD_OPTION_ON));
-  ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S)); // Needed for light sleep.
+
+  ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S_SCK)); // Needed for light sleep.
   // Prepare and then apply the LEDC PWM timer configuration
   ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
   ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
@@ -74,13 +76,20 @@ void pseudo_i2s_start()
   //std::cout << "pseudo_i2s_start done\n";
   //std::flush(std::cout);
   ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
+  //pinMode(GPIO_NUM_21, OUTPUT);
+  //digitalWrite(GPIO_NUM_21, HIGH);
+  //gpio_sleep_sel_dis(GPIO_NUM_21); // Needed for light sleep.
   //std::cout << "pseudo_i2s_start done\n";
   //std::flush(std::cout);
+  // add pulldown resistor to prevent noise.
+  //pinMode(PIN_PSUEDO_I2S_SCK, INPUT_PULLDOWN);
 
 }
 
 void pseudo_i2s_stop()
 {
   ESP_ERROR_CHECK(ledc_stop(LEDC_MODE, LEDC_CHANNEL, 0));
-  pinMode(PIN_PSUEDO_I2S, INPUT);
+  //pinMode(PIN_PSUEDO_I2S_SCK, OUTPUT);
+  //digitalWrite(PIN_PSUEDO_I2S_SCK, LOW);
+  pinMode(PIN_PSUEDO_I2S_SCK, INPUT);
 }

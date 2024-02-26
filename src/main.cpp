@@ -55,6 +55,7 @@ void setup()
   //i2s_audio_init();
 
   acquire_apb_power_lock();
+  ESP_ERROR_CHECK(esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M, ESP_PD_OPTION_ON));
 
   //esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_ON);
   //pseudo_i2s_start();
@@ -229,9 +230,9 @@ void test_audio_and_i2s() {
     i2s_audio_enter_light_sleep();
     pseudo_i2s_start();
     // Turn on built in LED for esp32 c3
-    std::cout << "esp_light_sleep_start: " << err << std::endl;
+    //std::cout << "esp_light_sleep_start: " << err << std::endl;
     err = esp_light_sleep_start();
-    std::cout << "esp_light_sleep_exited: " << err << std::endl;
+    //std::cout << "esp_light_sleep_exited: " << err << std::endl;
     if (err != ESP_OK) {
       if (err == ESP_ERR_SLEEP_REJECT) {
         Serial.printf("Light sleep failed: rejected\n");
@@ -243,9 +244,9 @@ void test_audio_and_i2s() {
     i2s_audio_exit_light_sleep();
     test_microphone_distortion();
     //i2s_audio_exit_light_sleep();
-    Serial.println("woke up");
+    //Serial.println("woke up");
     std::flush(std::cout);
-    delay(1000);
+    //delay(1000);
     count++;
   }
 }

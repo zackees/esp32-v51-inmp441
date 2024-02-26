@@ -217,9 +217,7 @@ void test_audio_and_i2s() {
   // pulse the light to let me know it's startup time
   //esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_OFF);
   // RTC fast
-
   uint32_t count = 0;
-
   i2s_audio_init();
   while (1) {
     Serial.printf("loop: %d\n", count);
@@ -231,8 +229,6 @@ void test_audio_and_i2s() {
     i2s_audio_enter_light_sleep();
     pseudo_i2s_start();
     // Turn on built in LED for esp32 c3
-
-
     std::cout << "esp_light_sleep_start: " << err << std::endl;
     err = esp_light_sleep_start();
     std::cout << "esp_light_sleep_exited: " << err << std::endl;

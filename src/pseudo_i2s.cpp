@@ -22,7 +22,8 @@ during main mcu sleep.
 #define LEDC_MODE LEDC_LOW_SPEED_MODE
 #define LEDC_CHANNEL LEDC_CHANNEL_0
 #define LEDC_DUTY_RES LEDC_TIMER_1_BIT // Set duty resolution to 13 bits
-#define LEDC_FREQUENCY (1024 * 1500)  // 1 mhz clock.
+#define LEDC_FREQUENCY_SCK (1024 * 1500)  // 1 mhz clock.
+#define LEDC_FREQUENCY_WS (LEDC_FREQUENCY_SCK / 32)  // 32 clocks per frame.
 #define PIN_PSUEDO_I2S_SCK GPIO_NUM_6
 
 #define PIN_PSUEDO_I2S_WS GPIO_NUM_21
@@ -42,9 +43,9 @@ namespace
       .speed_mode = LEDC_MODE,
       .duty_resolution = LEDC_DUTY_RES,
       .timer_num = LEDC_TIMER,
-      .freq_hz = LEDC_FREQUENCY, // Set output frequency
+      .freq_hz = LEDC_FREQUENCY_SCK, // Set output frequency
       .clk_cfg = LEDC_CLOCK
-    };
+  };
 
   // Prepare and then apply the LEDC PWM channel configuration
   ledc_channel_config_t ledc_channel_sck = {
@@ -60,29 +61,43 @@ namespace
       }
   };
 
+  ledc_timer_config_t ledc_timer_ws = {
+      //.duty_resolution  = LEDC_TIMER_13_BIT, // resolution of PWM duty
+      .speed_mode = LEDC_MODE,
+      .duty_resolution = LEDC_DUTY_RES,
+      .timer_num = LEDC_TIMER,
+      .freq_hz = LEDC_FREQUENCY_WS, // Set output frequency
+      .clk_cfg = LEDC_CLOCK
+  };
+
+  ledc_channel_config_t ledc_channel_ws = {
+      .gpio_num = PIN_PSUEDO_I2S_WS,
+      .speed_mode = LEDC_MODE,
+      .channel = LEDC_CHANNEL,
+      .intr_type = LEDC_INTR_DISABLE,
+      .timer_sel = LEDC_TIMER,
+      .duty = 0,
+      .hpoint = 0,
+      .flags = {
+        .output_invert = 1,
+      }
+  };
+
 } // namespace
 
 void pseudo_i2s_start()
 {
-  //rtc_clk_slow_freq_set(RTC_SLOW_FREQ_8MD256);
-  //std::cout << "pseudo_i2s_start\n";
-  //std::flush(std::cout);
-
   ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S_SCK)); // Needed for light sleep.
-  // Prepare and then apply the LEDC PWM timer configuration
   ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer_sck));
   ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel_sck));
   ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, 1));
-  //std::cout << "pseudo_i2s_start done\n";
-  //std::flush(std::cout);
   ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
-  //pinMode(GPIO_NUM_21, OUTPUT);
-  //digitalWrite(GPIO_NUM_21, HIGH);
-  //gpio_sleep_sel_dis(GPIO_NUM_21); // Needed for light sleep.
-  //std::cout << "pseudo_i2s_start done\n";
-  //std::flush(std::cout);
-  // add pulldown resistor to prevent noise.
-  //pinMode(PIN_PSUEDO_I2S_SCK, INPUT_PULLDOWN);
+
+  // ws pin setup
+  //ESP_ERROR_CHECK(gpio_sleep_sel_dis(PIN_PSUEDO_I2S_WS)); // Needed for light sleep.
+  //ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer_ws));
+  //ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel_ws));
+  //ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, 1));
 
 }
 

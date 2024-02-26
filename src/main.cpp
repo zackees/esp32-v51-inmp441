@@ -263,9 +263,16 @@ void test_bitbang_i2s() {
 }
 
 
+void test_i2s_psuedo_signal() {
+  pseudo_i2s_start();
+  while (1) {
+  }
+}
+
 // the loop function runs over and over again forever
 void loop()
 {
   //test_audio_and_i2s();
-  test_bitbang_i2s();
+  test_i2s_psuedo_signal();
+  //test_bitbang_i2s();
 }

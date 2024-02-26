@@ -68,7 +68,6 @@ void bit_bang_get_sample(uint16_t *sample)
       digitalWrite(PIN_SCK, HIGH); // Set the clock high
       // delayNanoseconds(SCK_HIGH_NS); // Wait for the other half of the clock period
     }
-
     // Finish the WS pulse
     digitalWrite(PIN_WS, LOW);
 
@@ -76,6 +75,13 @@ void bit_bang_get_sample(uint16_t *sample)
     if (WS_SETUP_NS > 0)
     {
       delayNanoseconds(1); // Setup time for the next word select, if needed
+    }
+    uint32_t now_us = micros();
+    while (micros() - now_us < 50)
+    {
+      // Wait for the next sample
+      digitalWrite(PIN_SCK, LOW);
+      digitalWrite(PIN_SCK, HIGH);
     }
   }
 }

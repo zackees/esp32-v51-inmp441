@@ -273,6 +273,6 @@ void test_i2s_psuedo_signal() {
 void loop()
 {
   //test_audio_and_i2s();
-  test_i2s_psuedo_signal();
-  //test_bitbang_i2s();
+  //test_i2s_psuedo_signal();
+  test_bitbang_i2s();
 }

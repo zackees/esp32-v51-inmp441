@@ -22,8 +22,8 @@ during main mcu sleep.
 #define LEDC_MODE LEDC_LOW_SPEED_MODE
 #define LEDC_CHANNEL LEDC_CHANNEL_0
 #define LEDC_DUTY_RES LEDC_TIMER_1_BIT // Set duty resolution to 13 bits
-#define LEDC_FREQUENCY_SCK (1024 * 1500)  // 1 mhz clock.
-#define LEDC_FREQUENCY_WS (LEDC_FREQUENCY_SCK / 32)  // 32 clocks per frame.
+#define LEDC_FREQUENCY_SCK (1024 * 2800)  // 1 mhz clock.
+#define LEDC_FREQUENCY_WS ((1024 * 1800) / 32)  // 32 clocks per frame.
 #define PIN_PSUEDO_I2S_SCK GPIO_NUM_6
 
 #define PIN_PSUEDO_I2S_WS GPIO_NUM_21
@@ -108,5 +108,5 @@ void pseudo_i2s_stop()
   //pinMode(PIN_PSUEDO_I2S_SCK, OUTPUT);
   //digitalWrite(PIN_PSUEDO_I2S_SCK, LOW);
   pinMode(PIN_PSUEDO_I2S_SCK, INPUT);
-  pinMode(PIN_PSUEDO_I2S_WS, INPUT);
+  pinMode(PIN_PSUEDO_I2S_WS, INPUT_PULLDOWN);
 }

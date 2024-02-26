@@ -29,7 +29,7 @@ using std::endl;
 
 #define I2S_NUM I2S_NUM_0
 // #define IS2_AUDIO_BUFFER_LEN 1024 // max samples for i2s_read
-#define IS2_SAMPLES_PER_CHANNEL 512
+#define IS2_SAMPLES_PER_CHANNEL 128
 #define IS2_AUDIO_BUFFER_LEN (IS2_SAMPLES_PER_CHANNEL * AUDIO_CHANNELS) // max samples for i2s_read
 #define AUDIO_BIT_RESOLUTION 16
 #define AUDIO_CHANNEL_SAMPLE_RATE (48000ul)

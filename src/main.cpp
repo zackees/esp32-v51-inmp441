@@ -30,7 +30,7 @@
 #include "defs.h"
 #include "i2s_device.h"
 #include "esp_pm.h"
-
+#include <iomanip>
 #include "pseudo_i2s.h"
 
 #define SLEEP_TIME_MS 2000
@@ -134,7 +134,12 @@ int32_t max_volume(audio_sample_t* begin, audio_sample_t* end) {
 void test_microphone_distortion() {
   uint32_t end_time = millis() + 1000ul;
   uint32_t start_time = millis();
-  while (millis() < end_time) {
+  while (true) {
+    uint32_t now = millis();
+    if (now > end_time) {
+      break;
+    }
+    uint32_t diff = now - start_time;
     audio_buffer_t buffer = {0};
     size_t bytes_read = i2s_read_samples(buffer);
     if (bytes_read > 0) {
@@ -142,7 +147,7 @@ void test_microphone_distortion() {
       audio_sample_t* begin = &buffer[0];
       audio_sample_t* end = &buffer[bytes_read];
       int32_t vol = max_volume(begin, end);
-      std::cout << "vol: " << vol << std::endl;
+      std::cout << std::setfill(' ') << std::setw(4) << diff << ":" << std::setw(5) << vol << std::endl;
     }
   }
 }

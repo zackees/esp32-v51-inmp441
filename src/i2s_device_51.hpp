@@ -17,7 +17,8 @@ namespace
   {
     INMP441_BIT_RESOLUTION = 24,
     INMP441_CHANNELS = 1,
-    INMP441_FULL_FRAME_SIZE = 32
+    INMP441_FULL_FRAME_SIZE = 32,
+    AUDIO_SAMPLES_PER_DMA_BUFFER = 16,
   };
 
   static_assert(AUDIO_BIT_RESOLUTION == 16, "Only 16 bit resolution is outputted by the microphone");
@@ -39,7 +40,7 @@ namespace
         .id = I2S_NUM_0,
         .role = I2S_ROLE_MASTER,
         .dma_desc_num = AUDIO_DMA_BUFFER_COUNT,
-        .dma_frame_num = IS2_AUDIO_BUFFER_LEN,
+        .dma_frame_num = AUDIO_SAMPLES_PER_DMA_BUFFER,  // Maybe make this 2 since we are using a callback.
         .auto_clear = false,
     };
     i2s_std_config_t rx_std_cfg = {
@@ -75,26 +76,29 @@ namespace
 
   I2SContext s_i2s_context = make_inmp441_context();
 
-  void init_i2s_pins()
-  {
-    // s_i2s_context = get_i2s_context();
-  }
-
+  QueueHandle_t s_audio_queue;
   uint32_t s_dbg_counter = 0;
 
   static IRAM_ATTR bool i2s_rx_queue_overflow_callback(i2s_chan_handle_t handle, i2s_event_data_t *event, void *user_ctx)
   {
     // handle RX queue overflow event ...
     s_dbg_counter++;
+    xQueueSendToFrontFromISR(s_audio_queue, &s_dbg_counter, NULL);
     return false;
   }
 
   void i2s_init_isr(i2s_chan_handle_t rx_handle)
-  {
+  {    
+    s_audio_queue = xQueueCreate(128, AUDIO_SAMPLES_PER_DMA_BUFFER * sizeof(audio_sample_t));
+    if (s_audio_queue == NULL)
+    {
+      ESP_LOGE("I2S", "Failed to create queue");
+      return;
+    }
 
     i2s_event_callbacks_t cbs = {
-        .on_recv = NULL,
-        .on_recv_q_ovf = i2s_rx_queue_overflow_callback,
+        .on_recv = i2s_rx_queue_overflow_callback,
+        .on_recv_q_ovf = NULL,
         .on_sent = NULL,
         .on_send_q_ovf = NULL,
     };
@@ -140,49 +144,25 @@ void i2s_audio_shutdown()
 
 void i2s_audio_enter_light_sleep()
 {
-  // digitalWrite(PIN_AUDIO_PWR, LOW); // Power off the IS2 microphone.
-  // hold pin engaged
-  digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone.
+  digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone during light sleep.
   gpio_hold_en(PIN_AUDIO_PWR);
-  // i2s_del_channel(s_i2s_context.rx_chan);
-  // i2s_stop(I2S_NUM_0);
-  // i2s_channel_disable(s_i2s_context.rx_chan);
-  //  hold WS high
-  // digitalWrite(PIN_I2S_WS, HIGH);
-  // gpio_hold_en(PIN_I2S_WS);
-  //  i2s_driver_uninstall(I2S_NUM_0);
 }
 
 void i2s_audio_exit_light_sleep()
 {
-  // digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone.
-
-  // i2s_start(I2S_NUM_0);
-  // gpio_hold_dis(PIN_I2S_WS);
-  // i2s_channel_enable(s_i2s_context.rx_chan);
-  //  i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
-  // i2s_channel_enable(s_i2s_context.rx_chan);
-  // init_i2s_pins();
-  //  stop then restart
-  // i2s_stop(I2S_NUM_0);
+  // Nothing to do here.
 }
 
 size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
 {
-  size_t bytes_read = 0;
-  esp_err_t err = i2s_channel_read(s_i2s_context.rx_chan, buffer, sizeof(buffer), &bytes_read, 0);
-  const size_t count = bytes_read / sizeof(audio_sample_t);
-  ASSERT(bytes_read / sizeof(audio_sample_t) <= IS2_AUDIO_BUFFER_LEN, "Buffer overflow!");
-  if (err == ESP_OK)
+  uint32_t dbg_counter = 0;
+  uint16_t my_buffer[256] = {0};
+  //if (xQueueReceive(s_audio_queue, &dbg_counter, 0))
+  size_t counter = 0;
+  while (xQueueReceive(s_audio_queue, my_buffer, 0))
   {
-    if (bytes_read > 0)
-    {
-      return count;
-    }
+    ++counter;
   }
-  if (err != ESP_ERR_TIMEOUT)
-  {
-    ESP_ERROR_CHECK(err);
-  }
-  return 0;
+  Serial.printf("RECEIVED %u AUDIO BUFFERS\n", counter);
+  return counter;
 }

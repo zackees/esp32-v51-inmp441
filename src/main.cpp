@@ -281,10 +281,10 @@ void test_i2s_isr() {
   i2s_audio_init();
   while (true) {
     uint32_t counter = i2s_get_dbg_counter();
-    Serial.printf("Counter: %d\n", counter);
-    delay(1000);
+    audio_buffer_t buffer = {0};
+    i2s_read_samples(buffer);
+    delay(3);
   }
-
 }
 
 

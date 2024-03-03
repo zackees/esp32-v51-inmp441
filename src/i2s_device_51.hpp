@@ -25,12 +25,18 @@ namespace
   static_assert(AUDIO_CHANNELS == 1, "Only 1 channel is supported");
   static_assert(sizeof(audio_sample_t) == 2, "audio_sample_t must be 16 bit");
 
+  QueueHandle_t s_audio_queue;
+  volatile bool s_isr_active = false;
+  uint32_t s_dbg_counter = 0;
+
   struct I2SContext
   {
     i2s_chan_handle_t rx_chan;
     i2s_chan_config_t i2s_chan_cfg_rx;
     i2s_std_config_t i2s_std_cfg_rx;
   };
+
+
 
   I2SContext make_inmp441_context()
   {
@@ -76,14 +82,14 @@ namespace
 
   I2SContext s_i2s_context = make_inmp441_context();
 
-  QueueHandle_t s_audio_queue;
-  uint32_t s_dbg_counter = 0;
-
   static IRAM_ATTR bool i2s_rx_queue_overflow_callback(i2s_chan_handle_t handle, i2s_event_data_t *event, void *user_ctx)
   {
     // handle RX queue overflow event ...
     s_dbg_counter++;
-    xQueueSendToFrontFromISR(s_audio_queue, &s_dbg_counter, NULL);
+    if (s_isr_active)
+    {
+      xQueueSendFromISR(s_audio_queue, &s_dbg_counter, NULL);
+    }
     return false;
   }
 
@@ -103,6 +109,7 @@ namespace
         .on_send_q_ovf = NULL,
     };
     ESP_ERROR_CHECK(i2s_channel_register_event_callback(rx_handle, &cbs, NULL));
+    s_isr_active = true;
   }
 
 } // namespace
@@ -142,35 +149,40 @@ void i2s_audio_shutdown()
   // i2s_del_channel(s_i2s_context.rx_chan);
 }
 
+bool s_prev_isr_active = false;
 void i2s_audio_enter_light_sleep()
 {
   digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone during light sleep.
   gpio_hold_en(PIN_AUDIO_PWR);
+  s_prev_isr_active = s_isr_active;
+  s_isr_active = false;
 }
 
 void i2s_audio_exit_light_sleep()
 {
-  // Nothing to do here.
+  s_isr_active = s_prev_isr_active;
 }
 
-size_t i2s_read_samples(audio_sample_t* buffer, size_t buffer_len)
+size_t i2s_read_samples(audio_sample_t* curr, audio_sample_t* end)
 {
-  audio_sample_t* curr = buffer;
-  audio_sample_t* end = buffer + buffer_len;
+  const audio_sample_t* start = curr;
   while (curr < end) {
     audio_sample_t dma_sample[AUDIO_SAMPLES_PER_DMA_BUFFER] = {0};
     bool ok = xQueueReceive(s_audio_queue, dma_sample, 0);
     if (!ok) {
       break;
     }
-    // make sure we aren't going to overflow the buffer
-    const audio_sample_t* next = curr + AUDIO_SAMPLES_PER_DMA_BUFFER;
-    if (next > end) {
-      // overflow event. Should we log this?
-      break;
+    const audio_sample_t* dma_begin = &dma_sample[0];
+    const audio_sample_t* dma_end = &dma_sample[AUDIO_SAMPLES_PER_DMA_BUFFER];
+    for (const audio_sample_t* dma_curr = dma_begin; dma_curr < dma_end; dma_curr++) {
+      if (curr < end) {
+        *curr = *dma_curr;
+        curr++;
+      } else {
+        Serial.println("i2s_read_samples: buffer overflow");
+        break;
+      }
     }
-    memcpy(curr, dma_sample, AUDIO_SAMPLES_PER_DMA_BUFFER * sizeof(audio_sample_t));
-    curr += AUDIO_SAMPLES_PER_DMA_BUFFER;
   }
-  return curr - buffer;
+  return curr - start;
 }

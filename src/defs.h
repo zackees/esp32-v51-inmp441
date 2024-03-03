@@ -40,6 +40,8 @@ using std::endl;
 #define LIGHT_SLEEP_TIME_uS uint32_t(1000 * 100) // 100 ms.
 #define TIME_TURNOFF 1500 // 1 second
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
 #define ASSERT_IMPL(x, msg, file, lineno)                                                                       \
   do                                                                                                            \
   {                                                                                                             \

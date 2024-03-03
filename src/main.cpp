@@ -264,10 +264,10 @@ void test_i2s_isr() {
     uint32_t counter = i2s_get_dbg_counter();
     audio_buffer_t buffer = {0};
     audio_sample_t* begin = &buffer[0];
-    audio_sample_t* end = &buffer[AUDIO_SAMPLES_PER_DMA_BUFFER];
-    //i2s_read_samples(buffer);
-    size_t n_samples = i2s_read_samples(begin, end - begin);
-    Serial.printf("n_samples: %d\n", n_samples);
+    audio_sample_t* end = begin + ARRAY_SIZE(buffer);
+    size_t n_samples = i2s_read_samples(begin, end);
+    Serial.printf("read %d samples\n", n_samples);
+    delay(8);
   }
 }
 

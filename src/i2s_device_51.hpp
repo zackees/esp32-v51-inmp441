@@ -162,5 +162,8 @@ size_t i2s_read_samples(audio_sample_t* buffer, size_t buffer_len)
     ++counter;
   }
   Serial.printf("RECEIVED %u AUDIO BUFFERS\n", counter);
-  return counter;
+
+  // return counter;
+  // final count is number of samples times counter
+  return counter * AUDIO_SAMPLES_PER_DMA_BUFFER;
 }

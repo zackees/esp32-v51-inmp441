@@ -153,11 +153,9 @@ void i2s_audio_exit_light_sleep()
   // Nothing to do here.
 }
 
-size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
+size_t i2s_read_samples(audio_sample_t* buffer, size_t buffer_len)
 {
-  uint32_t dbg_counter = 0;
   uint16_t my_buffer[256] = {0};
-  //if (xQueueReceive(s_audio_queue, &dbg_counter, 0))
   size_t counter = 0;
   while (xQueueReceive(s_audio_queue, my_buffer, 0))
   {

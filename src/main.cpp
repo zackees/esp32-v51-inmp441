@@ -132,7 +132,7 @@ int32_t max_volume(audio_sample_t* begin, audio_sample_t* end) {
 
 
 void test_microphone_distortion() {
-  uint32_t end_time = millis() + 1000ul;
+  uint32_t end_time = millis() + 50ul;
   uint32_t start_time = millis();
   while (true) {
     uint32_t now = millis();
@@ -147,7 +147,19 @@ void test_microphone_distortion() {
       audio_sample_t* begin = &buffer[0];
       audio_sample_t* end = &buffer[bytes_read];
       int32_t vol = max_volume(begin, end);
-      std::cout << std::setfill(' ') << std::setw(4) << diff << ":" << std::setw(5) << vol << std::endl;
+      int32_t tmp = vol;
+      char volBinary[17]; // 32 for binary digits + 1 for null terminator
+      memset(volBinary, '0', 17); // Fill with '0's initially
+      volBinary[17] = '\0'; // Null-terminate the string
+      
+      // Convert vol to binary string stored in volBinary
+      for (int i = 17; i >= 0; --i) {
+          volBinary[i] = (tmp & 1) + '0'; // Set the ith bit
+          tmp >>= 1; // Shift vol right by 1
+      }
+
+      // Print out the information
+      std::cout << std::setfill(' ') << std::setw(4) << diff << ":" << std::setw(5) << vol << " (" << volBinary << ")" << std::endl;
     }
   }
 }

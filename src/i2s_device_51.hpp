@@ -18,7 +18,7 @@ namespace
     INMP441_BIT_RESOLUTION = 24,
     INMP441_CHANNELS = 1,
     INMP441_FULL_FRAME_SIZE = 32,
-    AUDIO_SAMPLES_PER_DMA_BUFFER = 16,
+
   };
 
   static_assert(AUDIO_BIT_RESOLUTION == 16, "Only 16 bit resolution is outputted by the microphone");

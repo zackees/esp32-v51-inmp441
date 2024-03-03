@@ -10,7 +10,7 @@ typedef int16_t audio_sample_t;
 #error "Unsupported audio configuration"
 #endif
 
-typedef audio_sample_t audio_buffer_t[IS2_AUDIO_BUFFER_LEN];
+typedef audio_sample_t audio_buffer_t[AUDIO_SAMPLES_PER_DMA_BUFFER];
 
 void i2s_audio_init();
 void i2s_audio_shutdown();
@@ -19,7 +19,7 @@ size_t i2s_read_samples(audio_sample_t* buffer, size_t buffer_len);
 inline size_t i2s_read_samples(audio_buffer_t buffer) {
   // Legacy api
   audio_sample_t* begin = &buffer[0];
-  audio_sample_t* end = &buffer[IS2_AUDIO_BUFFER_LEN];
+  audio_sample_t* end = &buffer[AUDIO_SAMPLES_PER_DMA_BUFFER];
   return i2s_read_samples(begin, end - begin);
 }
 

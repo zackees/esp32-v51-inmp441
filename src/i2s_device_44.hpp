@@ -47,7 +47,7 @@ namespace
       .communication_format = i2s_comm_format_t(I2S_COMM_FORMAT_STAND_I2S),
       .intr_alloc_flags = 0,
       .dma_buf_count = AUDIO_DMA_BUFFER_COUNT,
-      .dma_buf_len = IS2_AUDIO_BUFFER_LEN,
+      .dma_buf_len = AUDIO_SAMPLES_PER_DMA_BUFFER,
       //.use_apll = true
   };
 
@@ -104,8 +104,8 @@ void i2s_isr_handler(void* arg)
   // This function will be called when an I2S interrupt occurs.
   // It should write the incoming data to a buffer.
 }
-
-size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
+AUDIO_SAMPLES_PER_DMA_BUFFER
+size_t i2s_read_samples(audio_sample_t (&buffer)[AUDIO_SAMPLES_PER_DMA_BUFFER])
 {
 
   size_t bytes_read = 0;

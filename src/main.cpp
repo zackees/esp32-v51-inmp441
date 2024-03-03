@@ -34,7 +34,7 @@ void setup()
   Serial.begin(115200);
   //i2s_audio_init();
 
-  acquire_apb_power_lock();
+  //acquire_apb_power_lock();
   ESP_ERROR_CHECK(esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M, ESP_PD_OPTION_ON));
 
   //esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_ON);
@@ -261,7 +261,6 @@ void test_is2_and_psuedo() {
 void test_i2s_isr() {
   i2s_audio_init();
   while (true) {
-    uint32_t counter = i2s_get_dbg_counter();
     audio_buffer_t buffer = {0};
     audio_sample_t* begin = &buffer[0];
     audio_sample_t* end = begin + ARRAY_SIZE(buffer);
@@ -271,19 +270,47 @@ void test_i2s_isr() {
   }
 }
 
+
 void test_i2s_isr_read_volume() {
-  i2s_audio_init();
-  while (true) {
-    uint32_t counter = i2s_get_dbg_counter();
+  static bool s_initialized = false;
+  if (!s_initialized) {
+    s_initialized = true;
+    i2s_audio_init();
+  }
+
+  uint32_t timeout = millis() + 500;
+
+  while (timeout > millis()) {
+    // uint32_t counter = i2s_get_dbg_counter();
     audio_buffer_t buffer = {0};
     audio_sample_t* begin = &buffer[0];
     audio_sample_t* end = begin + ARRAY_SIZE(buffer);
     size_t n_samples = i2s_read_samples(begin, end);
-    Serial.printf("read %d samples\n", n_samples);
-    int32_t vol = max_volume(begin, end);
-    Serial.printf("max-min: %d\n", vol);
-    delay(200);
+    if (n_samples) {
+    //Serial.printf("read %d samples\n", n_samples);
+      int32_t vol = max_volume(begin, begin + n_samples);
+
+      int32_t tmp = vol;
+      char volBinary[17]; // 32 for binary digits + 1 for null terminator
+      memset(volBinary, '0', 17); // Fill with '0's initially
+      volBinary[17] = '\0'; // Null-terminate the string
+      for (int i = 17; i >= 0; --i) {
+          volBinary[i] = (tmp & 1) + '0'; // Set the ith bit
+          tmp >>= 1; // Shift vol right by 1
+      }
+      std::cout << std::setfill(' ') << std::setw(5) << vol << " (" << volBinary << ")" << std::endl;
+
+    }
+ 
+    // Serial.printf("max-min: %d\n", vol);
+    delay(6);
   }
+
+  // go to sleep
+  my_light_sleep(1);
+  test_microphone_distortion(500);
+  // do noise test
+
 }
 
 #if 0

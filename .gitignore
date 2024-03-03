@@ -37,3 +37,6 @@
 **/__pycache__
 esp-idf/**
 .aider*
+
+!.aider.conf.yml
+!.aiderignore

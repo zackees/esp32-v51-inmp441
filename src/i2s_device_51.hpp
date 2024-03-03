@@ -28,6 +28,7 @@ namespace
   QueueHandle_t s_audio_queue;
   volatile bool s_isr_active = false;
   uint32_t s_dbg_counter = 0;
+  typedef audio_sample_t dma_buffer_t[AUDIO_SAMPLES_PER_DMA_BUFFER];
 
   struct I2SContext
   {
@@ -78,24 +79,35 @@ namespace
     };
     ctx = {rx_chan, i2s_chan_cfg_rx, rx_std_cfg};
     return ctx;
-  }
+ }
 
   I2SContext s_i2s_context = make_inmp441_context();
 
-  static IRAM_ATTR bool i2s_rx_queue_overflow_callback(i2s_chan_handle_t handle, i2s_event_data_t *event, void *user_ctx)
+  dma_buffer_t s_dbg_last_sample = {0};
+
+  static IRAM_ATTR bool i2s_rx_queue_callback(i2s_chan_handle_t handle, i2s_event_data_t *event, void *user_ctx)
   {
+    static_assert(
+      sizeof(dma_buffer_t) == AUDIO_SAMPLES_PER_DMA_BUFFER * sizeof(audio_sample_t),
+      "sizeof(dma_buffer_t) != AUDIO_SAMPLES_PER_DMA_BUFFER * sizeof(audio_sample_t)");
+    ASSERT(
+      event->size == sizeof(dma_buffer_t),
+      "i2s_rx_queue_overflow_callback: event->size != AUDIO_SAMPLES_PER_DMA_BUFFER * sizeof(audio_sample_t)");
     // handle RX queue overflow event ...
     s_dbg_counter++;
     if (s_isr_active)
     {
-      xQueueSendFromISR(s_audio_queue, &s_dbg_counter, NULL);
+      memcpy(s_dbg_last_sample, event->data, sizeof(dma_buffer_t));
+      xQueueSendFromISR(s_audio_queue, event->data, NULL);
     }
     return false;
   }
 
   void i2s_init_isr(i2s_chan_handle_t rx_handle)
-  {    
-    s_audio_queue = xQueueCreate(128, AUDIO_SAMPLES_PER_DMA_BUFFER * sizeof(audio_sample_t));
+  {
+    static const size_t kDmaSize = sizeof(dma_buffer_t);
+    static_assert(kDmaSize == AUDIO_SAMPLES_PER_DMA_BUFFER * sizeof(audio_sample_t), "kDmaSize != AUDIO_SAMPLES_PER_DMA_BUFFER * sizeof(audio_sample_t)");
+    s_audio_queue = xQueueCreate(128, kDmaSize);
     if (s_audio_queue == NULL)
     {
       ESP_LOGE("I2S", "Failed to create queue");
@@ -103,7 +115,7 @@ namespace
     }
 
     i2s_event_callbacks_t cbs = {
-        .on_recv = i2s_rx_queue_overflow_callback,
+        .on_recv = i2s_rx_queue_callback,
         .on_recv_q_ovf = NULL,
         .on_sent = NULL,
         .on_send_q_ovf = NULL,
@@ -165,6 +177,9 @@ void i2s_audio_exit_light_sleep()
 
 size_t i2s_read_samples(audio_sample_t* curr, audio_sample_t* end)
 {
+  // debug print last sample
+  audio_sample_t sample_on = s_dbg_last_sample[0];
+  Serial.printf("i2s_read_samples: last sample: %d\n", sample_on);
   const audio_sample_t* start = curr;
   while (curr < end) {
     audio_sample_t dma_sample[AUDIO_SAMPLES_PER_DMA_BUFFER] = {0};
@@ -172,6 +187,7 @@ size_t i2s_read_samples(audio_sample_t* curr, audio_sample_t* end)
     if (!ok) {
       break;
     }
+    Serial.printf("i2s[0]=%d\n", dma_sample[0]);
     const audio_sample_t* dma_begin = &dma_sample[0];
     const audio_sample_t* dma_end = &dma_sample[AUDIO_SAMPLES_PER_DMA_BUFFER];
     for (const audio_sample_t* dma_curr = dma_begin; dma_curr < dma_end; dma_curr++) {

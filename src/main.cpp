@@ -112,8 +112,8 @@ int32_t max_volume(audio_sample_t* begin, audio_sample_t* end) {
 
 
 
-void test_microphone_distortion() {
-  uint32_t end_time = millis() + 50ul;
+void test_microphone_distortion(uint32_t duration_ms = 50ul) {
+  uint32_t end_time = millis() + duration_ms;
   uint32_t start_time = millis();
   while (true) {
     uint32_t now = millis();
@@ -271,11 +271,62 @@ void test_i2s_isr() {
   }
 }
 
+void test_i2s_isr_read_volume() {
+  i2s_audio_init();
+  while (true) {
+    uint32_t counter = i2s_get_dbg_counter();
+    audio_buffer_t buffer = {0};
+    audio_sample_t* begin = &buffer[0];
+    audio_sample_t* end = begin + ARRAY_SIZE(buffer);
+    size_t n_samples = i2s_read_samples(begin, end);
+    Serial.printf("read %d samples\n", n_samples);
+    int32_t vol = max_volume(begin, end);
+    Serial.printf("max-min: %d\n", vol);
+    delay(200);
+  }
+}
+
+#if 0
+void test_i2s_isr_and_light_sleep() {
+  i2s_audio_init();
+  while (true) {
+    uint32_t counter = i2s_get_dbg_counter();
+    audio_buffer_t buffer = {0};
+    audio_sample_t* begin = &buffer[0];
+    audio_sample_t* end = begin + ARRAY_SIZE(buffer);
+    size_t n_samples = i2s_read_samples(begin, end);
+    Serial.printf("read %d samples\n", n_samples);
+    esp_err_t err = esp_sleep_enable_timer_wakeup(1 * 500);
+    std::cout << "esp_sleep_enable_timer_wakeup: " << err << std::endl;
+    if (err != ESP_OK) {
+      Serial.printf("Light sleep failed: %d\n", err);
+    }
+    std::cout << "esp_light_sleep_start: " << err << std::endl;
+    i2s_audio_enter_light_sleep();
+    err = esp_light_sleep_start();
+    std::cout << "esp_light_sleep_exited: " << err << std::endl;
+    i2s_audio_exit_light_sleep();
+    // invoke the distortion test
+    test_microphone_distortion(1000);
+
+
+    if (err != ESP_OK) {
+      if (err == ESP_ERR_SLEEP_REJECT) {
+        Serial.printf("Light sleep failed: rejected\n");
+      } else {
+        Serial.printf("Light sleep failed: %d\n", err);
+      }
+    }
+  }
+}
+#endif  // note to test this
+
 
 // the loop function runs over and over again forever
 void loop()
 {
   //test_audio_and_i2s();
   //test_is2_and_psuedo();
-  test_i2s_isr();
+  //test_i2s_isr_and_light_sleep();
+  test_i2s_isr_read_volume();
 }

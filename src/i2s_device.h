@@ -18,5 +18,6 @@ size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN]);
 
 void i2s_audio_enter_light_sleep();
 void i2s_audio_exit_light_sleep();
+void i2s_isr_handler(void* arg);
 
 #endif // _I2S_DEVICE_H_

@@ -98,6 +98,13 @@ void i2s_audio_exit_light_sleep()
   //i2s_start(I2S_NUM_0);
 }
 
+void i2s_isr_handler(void* arg)
+{
+  // Implement the ISR routine here.
+  // This function will be called when an I2S interrupt occurs.
+  // It should write the incoming data to a buffer.
+}
+
 size_t i2s_read_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
 {
 

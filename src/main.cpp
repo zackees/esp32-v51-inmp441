@@ -277,10 +277,21 @@ void test_is2_and_psuedo() {
   }
 }
 
+void test_i2s_isr() {
+  i2s_audio_init();
+  while (true) {
+    uint32_t counter = i2s_get_dbg_counter();
+    Serial.printf("Counter: %d\n", counter);
+    delay(1000);
+  }
+
+}
+
 
 // the loop function runs over and over again forever
 void loop()
 {
-  test_audio_and_i2s();
+  //test_audio_and_i2s();
   //test_is2_and_psuedo();
+  test_i2s_isr();
 }

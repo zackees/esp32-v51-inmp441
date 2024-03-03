@@ -20,4 +20,6 @@ void i2s_audio_enter_light_sleep();
 void i2s_audio_exit_light_sleep();
 void i2s_isr_handler(void* arg);
 
+uint32_t i2s_get_dbg_counter();
+
 #endif // _I2S_DEVICE_H_

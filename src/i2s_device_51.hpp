@@ -155,15 +155,22 @@ void i2s_audio_exit_light_sleep()
 
 size_t i2s_read_samples(audio_sample_t* buffer, size_t buffer_len)
 {
-  uint16_t my_buffer[256] = {0};
-  size_t counter = 0;
-  while (xQueueReceive(s_audio_queue, my_buffer, 0))
-  {
-    ++counter;
+  audio_sample_t* curr = buffer;
+  audio_sample_t* end = buffer + buffer_len;
+  while (curr < end) {
+    audio_sample_t dma_sample[AUDIO_SAMPLES_PER_DMA_BUFFER] = {0};
+    bool ok = xQueueReceive(s_audio_queue, dma_sample, 0);
+    if (!ok) {
+      break;
+    }
+    // make sure we aren't going to overflow the buffer
+    const audio_sample_t* next = curr + AUDIO_SAMPLES_PER_DMA_BUFFER;
+    if (next > end) {
+      // overflow event. Should we log this?
+      break;
+    }
+    memcpy(curr, dma_sample, AUDIO_SAMPLES_PER_DMA_BUFFER * sizeof(audio_sample_t));
+    curr += AUDIO_SAMPLES_PER_DMA_BUFFER;
   }
-  Serial.printf("RECEIVED %u AUDIO BUFFERS\n", counter);
-
-  // return counter;
-  // final count is number of samples times counter
-  return counter * AUDIO_SAMPLES_PER_DMA_BUFFER;
+  return curr - buffer;
 }

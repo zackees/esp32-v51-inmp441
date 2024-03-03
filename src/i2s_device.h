@@ -16,6 +16,14 @@ void i2s_audio_init();
 void i2s_audio_shutdown();
 size_t i2s_read_samples(audio_sample_t* buffer, size_t buffer_len);
 
+inline size_t i2s_read_samples(audio_buffer_t buffer) {
+  // Legacy api
+  audio_sample_t* begin = &buffer[0];
+  audio_sample_t* end = &buffer[IS2_AUDIO_BUFFER_LEN];
+  return i2s_read_samples(begin, end - begin);
+}
+
+
 void i2s_audio_enter_light_sleep();
 void i2s_audio_exit_light_sleep();
 void i2s_isr_handler(void* arg);

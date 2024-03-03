@@ -130,11 +130,6 @@ int32_t max_volume(audio_sample_t* begin, audio_sample_t* end) {
   return int32_t(*high) - *low;
 }
 
-size_t polyfill_i2s_read_samples(audio_buffer_t buffer) {
-  audio_sample_t* begin = &buffer[0];
-  audio_sample_t* end = &buffer[IS2_AUDIO_BUFFER_LEN];
-  return i2s_read_samples(begin, end - begin);
-}
 
 
 void test_microphone_distortion() {
@@ -147,7 +142,7 @@ void test_microphone_distortion() {
     }
     uint32_t diff = now - start_time;
     audio_buffer_t buffer = {0};
-    size_t bytes_read = polyfill_i2s_read_samples(buffer);
+    size_t bytes_read = i2s_read_samples(buffer);
     if (bytes_read > 0) {
       uint32_t diff = millis() - start_time;
       audio_sample_t* begin = &buffer[0];
@@ -178,7 +173,7 @@ void i2s_sleep_test_microphone_distortion() {
   uint32_t start_time = millis();
   while (millis() < end_time) {
     audio_buffer_t buffer = {0};
-    size_t bytes_read = polyfill_i2s_read_samples(buffer);
+    size_t bytes_read = i2s_read_samples(buffer);
     if (bytes_read > 0) {
       uint32_t diff = millis() - start_time;
       audio_sample_t* begin = &buffer[0];
@@ -194,7 +189,7 @@ void i2s_sleep_test_microphone_distortion() {
   start_time = millis();
   while (millis() < end_time) {
     audio_buffer_t buffer = {0};
-    size_t bytes_read = polyfill_i2s_read_samples(buffer);
+    size_t bytes_read = i2s_read_samples(buffer);
     if (bytes_read > 0) {
       uint32_t diff = millis() - start_time;
       audio_sample_t* begin = &buffer[0];
@@ -290,7 +285,7 @@ void test_i2s_isr() {
     audio_buffer_t buffer = {0};
     audio_sample_t* begin = &buffer[0];
     audio_sample_t* end = &buffer[IS2_AUDIO_BUFFER_LEN];
-    //polyfill_i2s_read_samples(buffer);
+    //i2s_read_samples(buffer);
     size_t n_samples = i2s_read_samples(begin, end - begin);
     Serial.printf("n_samples: %d\n", n_samples);
   }

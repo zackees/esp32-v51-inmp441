@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <cmath>
 
+#include "i2s_device.h"
+
 inline float linear_interpolation(float start_value, float end_value, float t) {
     return start_value + (end_value - start_value) * t;
 }
@@ -38,4 +40,5 @@ char pixelBrightnessToChar(float value, float min_value, float max_value);
 
 void print_17_bitstring(int32_t vol);
 
+int32_t max_volume(const audio_sample_t* begin, const audio_sample_t* end);
 #endif  // _UTIL_H_

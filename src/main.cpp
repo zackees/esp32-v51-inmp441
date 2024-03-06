@@ -67,11 +67,7 @@ void setup()
 }
 
 
-int32_t max_volume(const audio_sample_t* begin, const audio_sample_t* end) {
-  const audio_sample_t* low = std::min_element(begin, end);
-  const audio_sample_t* high = std::max_element(begin, end);
-  return int32_t(*high) - *low;
-}
+
 
 void test_microphone_distortion(uint32_t duration_ms = 50ul) {
   uint32_t end_time = millis() + duration_ms;

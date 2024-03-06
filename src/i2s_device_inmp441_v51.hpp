@@ -11,6 +11,9 @@ Not thread safe.
 #include "i2s_device.h"
 #include "driver/gpio.h"
 
+
+#include "util.h"
+
 namespace
 {
   enum
@@ -18,16 +21,18 @@ namespace
     INMP441_BIT_RESOLUTION = 24,
     INMP441_CHANNELS = 1,
     INMP441_FULL_FRAME_SIZE = 32,
-
+    INMP441_FILTER_SIGNAL = 1, // true means the signal is filtered from wake from sleep glitch
   };
 
   static_assert(AUDIO_BIT_RESOLUTION == 16, "Only 16 bit resolution is outputted by the microphone");
   static_assert(AUDIO_CHANNELS == 1, "Only 1 channel is supported");
   static_assert(sizeof(audio_sample_t) == 2, "audio_sample_t must be 16 bit");
 
-  QueueHandle_t s_audio_queue;
-
   typedef audio_sample_t dma_buffer_t[AUDIO_SAMPLES_PER_DMA_BUFFER];
+
+  QueueHandle_t s_audio_queue;
+  dma_buffer_t s_last_dma_buffer;
+  bool s_last_dma_buffer_valid = true;
 
   struct I2SContext
   {
@@ -35,8 +40,6 @@ namespace
     i2s_chan_config_t i2s_chan_cfg_rx;
     i2s_std_config_t i2s_std_cfg_rx;
   };
-
-
 
   I2SContext make_inmp441_context()
   {
@@ -46,7 +49,7 @@ namespace
         .id = I2S_NUM_0,
         .role = I2S_ROLE_MASTER,
         .dma_desc_num = AUDIO_DMA_BUFFER_COUNT,
-        .dma_frame_num = AUDIO_SAMPLES_PER_DMA_BUFFER,  // Maybe make this 2 since we are using a callback.
+        .dma_frame_num = AUDIO_SAMPLES_PER_DMA_BUFFER, // Maybe make this 2 since we are using a callback.
         .auto_clear = false,
     };
     i2s_std_config_t rx_std_cfg = {
@@ -82,8 +85,6 @@ namespace
   I2SContext s_i2s_context = make_inmp441_context();
 } // namespace
 
-
-
 void i2s_audio_init()
 {
   pinMode(PIN_AUDIO_PWR, OUTPUT);
@@ -101,7 +102,6 @@ void i2s_audio_init()
   ESP_ERROR_CHECK(err);
   // Set the pulldown resistor on the SD pin
   gpio_set_pull_mode(PIN_IS2_SD, GPIO_PULLDOWN_ONLY);
-
 }
 
 // esp_err_t i2s_channel_read(i2s_chan_handle_t handle, void *dest, size_t size, size_t *bytes_read, uint32_t timeout_ms)
@@ -121,17 +121,18 @@ void i2s_audio_enter_light_sleep()
 
 void i2s_audio_exit_light_sleep()
 {
-  
 }
 
-size_t i2s_read_dma_buffer(dma_buffer_t* dma_block, uint32_t timeout) {
+
+size_t i2s_read_dma_buffer(dma_buffer_t *dma_block, uint32_t timeout)
+{
   size_t bytes_read = 0;
   esp_err_t err = i2s_channel_read(
-    s_i2s_context.rx_chan,
-    dma_block,
-    sizeof(dma_buffer_t),
-    &bytes_read,
-    timeout  // timeout - non blocking
+      s_i2s_context.rx_chan,
+      dma_block,
+      sizeof(dma_buffer_t),
+      &bytes_read,
+      timeout // timeout - non blocking
   );
   uint32_t start = millis();
   if (err != ESP_OK)
@@ -139,16 +140,42 @@ size_t i2s_read_dma_buffer(dma_buffer_t* dma_block, uint32_t timeout) {
     if (err != ESP_ERR_TIMEOUT)
     {
       ESP_ERROR_CHECK(err);
-    } else {
+    }
+    else
+    {
       // cout << "Timeout occured" << endl;
     }
     return 0;
   }
-  uint32_t diff = millis() - start;
+  if (INMP441_FILTER_SIGNAL)
+  {
+    audio_sample_t *begin = reinterpret_cast<audio_sample_t *>(dma_block);
+    audio_sample_t *end = begin + AUDIO_SAMPLES_PER_DMA_BUFFER;
+    int32_t vol = max_volume(begin, end);
+    if (vol == 0)
+    {
+      // Corrupted data, unique to the inmp441 (on esp32-c3?)
+      // instead just copy the last buffer.
+      memcpy(dma_block, &s_last_dma_buffer, sizeof(dma_buffer_t));
+      s_last_dma_buffer_valid = false;
+      return AUDIO_SAMPLES_PER_DMA_BUFFER;
+    }
+    // 2nd state, is this the next buffer after the corrupted buffer?
+    // If so, then it is corrupted as well.
+    if (!s_last_dma_buffer_valid)
+    {
+      s_last_dma_buffer_valid = true; // Reset the state.
+      memcpy(&s_last_dma_buffer, dma_block, sizeof(dma_buffer_t));
+      return AUDIO_SAMPLES_PER_DMA_BUFFER;
+    }
+    // Store the last buffer.
+    s_last_dma_buffer_valid = true;
+    memcpy(&s_last_dma_buffer, dma_block, sizeof(dma_buffer_t));
+  }
   return bytes_read / sizeof(audio_sample_t);
 }
 
-size_t i2s_read_samples(audio_sample_t* begin, audio_sample_t* end, uint32_t timeout)
+size_t i2s_read_samples(audio_sample_t *begin, audio_sample_t *end, uint32_t timeout)
 {
   size_t bytes_read = 0;
   size_t n_samples = 0;
@@ -160,7 +187,7 @@ size_t i2s_read_samples(audio_sample_t* begin, audio_sample_t* end, uint32_t tim
       cout << "break because samples_left: " << samples_left << endl;
       break;
     }
-    dma_buffer_t* block = reinterpret_cast<dma_buffer_t*>(begin);
+    dma_buffer_t *block = reinterpret_cast<dma_buffer_t *>(begin);
     size_t new_samples = i2s_read_dma_buffer(block, timeout);
     n_samples += new_samples;
     if (new_samples != AUDIO_SAMPLES_PER_DMA_BUFFER)

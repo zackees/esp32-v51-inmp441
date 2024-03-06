@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 
+#include <algorithm>
+
 uint64_t millis64()
 {
   // NOT thread safe.
@@ -44,4 +46,11 @@ void print_17_bitstring(int32_t vol) {  // diff between max and min int16_t
   // Serial.printf("%d (%s)\n", vol, volBinary);
   // Correct the printf so that it behaves like the std::cout with the proper spacing
   Serial.printf("%5d (%s)\n", vol, volBinary);
+}
+
+
+int32_t max_volume(const audio_sample_t* begin, const audio_sample_t* end) {
+  const audio_sample_t* low = std::min_element(begin, end);
+  const audio_sample_t* high = std::max_element(begin, end);
+  return int32_t(*high) - *low;
 }

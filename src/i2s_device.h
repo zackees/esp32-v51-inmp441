@@ -19,7 +19,7 @@ size_t i2s_read_samples(audio_sample_t* begin, audio_sample_t* end);
 inline size_t i2s_read_samples(audio_buffer_t buffer) {
   // Legacy api
   audio_sample_t* begin = &buffer[0];
-  audio_sample_t* end = &buffer[AUDIO_SAMPLES_PER_DMA_BUFFER];  // Fix me.
+  audio_sample_t* end = begin + ARRAY_SIZE(buffer);
   return i2s_read_samples(begin, end);
 }
 

@@ -124,24 +124,50 @@ void i2s_audio_exit_light_sleep()
   
 }
 
-size_t i2s_read_samples(audio_sample_t* begin, audio_sample_t* end)
-{
+size_t i2s_read_dma_buffer(dma_buffer_t* dma_block) {
   size_t bytes_read = 0;
-  size_t n_write_buffer_bytes = (end - begin) * sizeof(audio_sample_t);
   esp_err_t err = i2s_channel_read(
     s_i2s_context.rx_chan,
-    begin,
-    n_write_buffer_bytes,
+    dma_block,
+    sizeof(dma_buffer_t),
     &bytes_read,
     0  // timeout - non blocking
   );
+  uint32_t start = millis();
   if (err != ESP_OK)
   {
     if (err != ESP_ERR_TIMEOUT)
     {
       ESP_ERROR_CHECK(err);
+    } else {
+      // cout << "Timeout occured" << endl;
     }
     return 0;
   }
+  uint32_t diff = millis() - start;
   return bytes_read / sizeof(audio_sample_t);
+}
+
+size_t i2s_read_samples(audio_sample_t* begin, audio_sample_t* end)
+{
+  size_t bytes_read = 0;
+  size_t n_samples = 0;
+  while (begin < end)
+  {
+    size_t samples_left = end - begin;
+    if (samples_left < AUDIO_SAMPLES_PER_DMA_BUFFER)
+    {
+      cout << "break because samples_left: " << samples_left << endl;
+      break;
+    }
+    dma_buffer_t* block = reinterpret_cast<dma_buffer_t*>(begin);
+    size_t new_samples = i2s_read_dma_buffer(block);
+    n_samples += new_samples;
+    if (new_samples != AUDIO_SAMPLES_PER_DMA_BUFFER)
+    {
+      break;
+    }
+    begin += n_samples;
+  }
+  return n_samples;
 }

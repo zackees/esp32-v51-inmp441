@@ -17,7 +17,7 @@
 
 #define SLEEP_TIME_MS 2000
 #define ENABLE_SLEEP 1
-#define FREEZE_APB_CLOCK 0
+#define PRINT_NORMAL_OPERATION 1
 
 
 #if ESP_IDF_VERSION_MAJOR > 5 || (ESP_IDF_VERSION_MAJOR == 5 && ESP_IDF_VERSION_MINOR >= 1)
@@ -30,13 +30,7 @@
 
 esp_pm_lock_handle_t apb_lock;
 
-void acquire_apb_power_lock() {
-  esp_err_t err = esp_pm_lock_create(
-    ESP_PM_APB_FREQ_MAX,
-    0,
-    "i2s-apb-lock",
-    &apb_lock);
-}
+
 
 void enable_ledc_light_sleep() {
   #if V5_PLUS
@@ -55,9 +49,6 @@ void setup()
   // pinMode(LED_BUILTIN, OUTPUT);
   delay(1000);
   Serial.begin(115200);
-  #if FREEZE_APB_CLOCK
-  acquire_apb_power_lock();
-  #endif
 
   #if ENABLE_LEDC_LIGHT_SLEEP
   ESP_ERROR_CHECK(esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M, ESP_PD_OPTION_ON));
@@ -105,13 +96,13 @@ void test_microphone_distortion(uint32_t duration_ms = 50ul) {
 void test_i2s_read_and_light_sleep() {
   static bool s_initialized = false;
   if (!s_initialized) {
+    Serial.printf("Initializing i2s\n");
     s_initialized = true;
     i2s_audio_init();
   }
   cout << "Testing i2s read and light sleep\n";
 
   uint32_t timeout = millis() + 500;
-  delay(100);
   cout << "Normal Operation\n";
 
   while (timeout > millis()) {
@@ -124,7 +115,9 @@ void test_i2s_read_and_light_sleep() {
     if (n_samples) {
     //Serial.printf("read %d samples\n", n_samples);
       int32_t vol = max_volume(begin, begin + n_samples);
-      print_17_bitstring(vol);
+      if (PRINT_NORMAL_OPERATION) {
+        print_17_bitstring(vol);
+      }
       delay(5);
     }
   }
@@ -133,6 +126,7 @@ void test_i2s_read_and_light_sleep() {
   std::flush(cout);
   {
     esp_err_t err = esp_sleep_enable_timer_wakeup(2 * 1000);
+    delay(50);
     if (err != ESP_OK) {
       Serial.printf("Light sleep failed: %d\n", err);
     }
@@ -147,7 +141,7 @@ void test_i2s_read_and_light_sleep() {
   }
 
   cout << "Exiting light sleep\n";
-  test_microphone_distortion(100);
+  test_microphone_distortion(15);
   cout << "tested microphone distortion\n";
 }
 

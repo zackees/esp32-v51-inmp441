@@ -11,7 +11,7 @@ Not thread safe.
 #include "i2s_device.h"
 #include "driver/gpio.h"
 
-
+#include "esp_pm.h"
 #include "util.h"
 
 namespace
@@ -22,13 +22,16 @@ namespace
     INMP441_CHANNELS = 1,
     INMP441_FULL_FRAME_SIZE = 32,
     INMP441_FILTER_SIGNAL = 1, // true means the signal is filtered from wake from sleep glitch
+    INMP441_FREEZE_APB_CLOCK = 0,
+    INMP441_DISABLE_CHANNEL_ON_LIGHT_SLEEP = 0,
   };
 
   static_assert(AUDIO_BIT_RESOLUTION == 16, "Only 16 bit resolution is outputted by the microphone");
   static_assert(AUDIO_CHANNELS == 1, "Only 1 channel is supported");
   static_assert(sizeof(audio_sample_t) == 2, "audio_sample_t must be 16 bit");
 
-  typedef audio_sample_t dma_buffer_t[AUDIO_SAMPLES_PER_DMA_BUFFER];
+
+
 
   QueueHandle_t s_audio_queue;
   dma_buffer_t s_last_dma_buffer;
@@ -83,12 +86,23 @@ namespace
     return ctx;
   }
   I2SContext s_i2s_context = make_inmp441_context();
+  esp_pm_lock_handle_t apb_lock;
+  void acquire_apb_power_lock() {
+    esp_err_t err = esp_pm_lock_create(
+      ESP_PM_APB_FREQ_MAX,
+      0,
+      "i2s-apb-lock",
+      &apb_lock);
+  }
 } // namespace
 
 void i2s_audio_init()
 {
   pinMode(PIN_AUDIO_PWR, OUTPUT);
   digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone.
+  if (INMP441_FREEZE_APB_CLOCK) {
+    acquire_apb_power_lock();
+  }
   esp_err_t err = i2s_new_channel(&s_i2s_context.i2s_chan_cfg_rx, NULL, &s_i2s_context.rx_chan);
   ESP_ERROR_CHECK(err);
   err = i2s_channel_init_std_mode(s_i2s_context.rx_chan, &s_i2s_context.i2s_std_cfg_rx);
@@ -110,6 +124,10 @@ void i2s_audio_shutdown()
 {
   // i2s_stop(I2S_NUM_0);
   //  i2s_driver_uninstall(I2S_NUM_0);
+  if (INMP441_DISABLE_CHANNEL_ON_LIGHT_SLEEP)
+  {
+    i2s_channel_disable(s_i2s_context.rx_chan);
+  }
   // i2s_del_channel(s_i2s_context.rx_chan);
 }
 
@@ -117,10 +135,20 @@ void i2s_audio_enter_light_sleep()
 {
   digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone during light sleep.
   gpio_hold_en(PIN_AUDIO_PWR);
+  //i2s_channel_disable(s_i2s_context.rx_chan);
+  if (INMP441_DISABLE_CHANNEL_ON_LIGHT_SLEEP)
+  {
+    i2s_channel_disable(s_i2s_context.rx_chan);
+  }
 }
 
 void i2s_audio_exit_light_sleep()
 {
+  //i2s_channel_enable(s_i2s_context.rx_chan);
+  if (INMP441_DISABLE_CHANNEL_ON_LIGHT_SLEEP)
+  {
+    i2s_channel_enable(s_i2s_context.rx_chan);
+  }
 }
 
 
@@ -179,7 +207,9 @@ size_t i2s_read_samples(audio_sample_t *begin, audio_sample_t *end, uint32_t tim
 {
   size_t bytes_read = 0;
   size_t n_samples = 0;
-  while (begin < end)
+  const bool timeout_enabled = timeout > 0;
+  uint32_t expire_time = millis() + timeout;
+  while ((begin < end) && (!timeout_enabled || millis() < expire_time))
   {
     size_t samples_left = end - begin;
     if (samples_left < AUDIO_SAMPLES_PER_DMA_BUFFER)
@@ -188,7 +218,7 @@ size_t i2s_read_samples(audio_sample_t *begin, audio_sample_t *end, uint32_t tim
       break;
     }
     dma_buffer_t *block = reinterpret_cast<dma_buffer_t *>(begin);
-    size_t new_samples = i2s_read_dma_buffer(block, timeout);
+    size_t new_samples = i2s_read_dma_buffer(block, 0);
     n_samples += new_samples;
     if (new_samples != AUDIO_SAMPLES_PER_DMA_BUFFER)
     {

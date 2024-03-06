@@ -11,6 +11,7 @@ typedef int16_t audio_sample_t;
 #endif
 
 typedef audio_sample_t audio_buffer_t[512];
+typedef audio_sample_t dma_buffer_t[AUDIO_SAMPLES_PER_DMA_BUFFER];
 
 void i2s_audio_init();
 void i2s_audio_shutdown();
@@ -23,6 +24,10 @@ inline size_t i2s_read_samples(audio_buffer_t buffer, uint32_t timeout) {
   return i2s_read_samples(begin, end, timeout);
 }
 
+inline bool i2s_read_dma_sample(dma_buffer_t dma_buff, uint32_t timeout) {
+  size_t samples_read = i2s_read_samples(dma_buff, dma_buff + AUDIO_SAMPLES_PER_DMA_BUFFER, timeout);
+  return samples_read > 0;
+}
 
 void i2s_audio_enter_light_sleep();
 void i2s_audio_exit_light_sleep();

@@ -11,14 +11,14 @@
 #include "i2s_device.h"
 #include "esp_pm.h"
 #include <iomanip>
-#include "pseudo_i2s.h"
+#include "util.h"
+
+#include "esp_idf_version.h"
 
 #define SLEEP_TIME_MS 2000
 #define ENABLE_SLEEP 1
 #define FREEZE_APB_CLOCK 0
 
-
-#include "esp_idf_version.h"
 
 #if ESP_IDF_VERSION_MAJOR > 5 || (ESP_IDF_VERSION_MAJOR == 5 && ESP_IDF_VERSION_MINOR >= 1)
 // Your code here for versions 5.1 and above
@@ -47,21 +47,6 @@ void enable_ledc_light_sleep() {
   if (err != ESP_OK) {
     Serial.printf("Failed to enable light sleep: %d\n", err);
   }
-}
-
-void print_17_bitstring(int32_t vol) {  // diff between max and min int16_t
-  int32_t tmp = vol;
-  char volBinary[20] = {0}; // 32 for binary digits + 1 for null terminator
-  //memset(volBinary, '0', 17); // Fill with '0's initially
-  volBinary[17] = '\0'; // Null-terminate the string
-  for (int i = 17; i >= 0; --i) {
-      volBinary[i] = (tmp & 1)? '1' : '0'; // Set the ith bit
-      tmp >>= 1; // Shift vol right by 1
-  }
-  // std::cout << std::setfill(' ') << std::setw(5) << vol << " (" << volBinary << ")" << std::endl;
-  // Serial.printf("%d (%s)\n", vol, volBinary);
-  // Correct the printf so that it behaves like the std::cout with the proper spacing
-  Serial.printf("%5d (%s)\n", vol, volBinary);
 }
 
 void setup()
@@ -98,7 +83,7 @@ void test_microphone_distortion(uint32_t duration_ms = 50ul) {
     }
     uint32_t diff = now - start_time;
     audio_buffer_t buffer = {0};
-    size_t samples_read = i2s_read_samples(buffer);
+    size_t samples_read = i2s_read_samples(buffer, 0);
     // cout << "Samples read: " << samples_read << endl;
     //Serial.printf("Samples read: %d\n", samples_read);
 
@@ -138,7 +123,7 @@ void test_i2s_read_and_light_sleep() {
     audio_buffer_t buffer = {0};
     audio_sample_t* begin = &buffer[0];
     // cout << "Number of reading sample capacity: " << sizeof(buffer) / sizeof(*begin) << endl;
-    size_t n_samples = i2s_read_samples(buffer);
+    size_t n_samples = i2s_read_samples(buffer, 0);
     //cout << "Number of samples read: " << n_samples << endl;
     if (n_samples) {
     //Serial.printf("read %d samples\n", n_samples);

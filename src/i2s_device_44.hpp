@@ -104,7 +104,7 @@ void i2s_isr_handler(void* arg)
   // This function will be called when an I2S interrupt occurs.
   // It should write the incoming data to a buffer.
 }
-AUDIO_SAMPLES_PER_DMA_BUFFER
+
 size_t i2s_read_samples(audio_sample_t (&buffer)[AUDIO_SAMPLES_PER_DMA_BUFFER])
 {
 

@@ -36,4 +36,6 @@ inline float exponential_interpolation(float x, float rate, float time) {
 uint64_t millis64();
 char pixelBrightnessToChar(float value, float min_value, float max_value);
 
+void print_17_bitstring(int32_t vol);
+
 #endif  // _UTIL_H_

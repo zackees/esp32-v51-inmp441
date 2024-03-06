@@ -30,3 +30,18 @@ char pixelBrightnessToChar(float value, float min_value, float max_value)
 
   return gradation[index];
 }
+
+void print_17_bitstring(int32_t vol) {  // diff between max and min int16_t
+  int32_t tmp = vol;
+  char volBinary[20] = {0}; // 32 for binary digits + 1 for null terminator
+  //memset(volBinary, '0', 17); // Fill with '0's initially
+  volBinary[17] = '\0'; // Null-terminate the string
+  for (int i = 17; i >= 0; --i) {
+      volBinary[i] = (tmp & 1)? '1' : '0'; // Set the ith bit
+      tmp >>= 1; // Shift vol right by 1
+  }
+  // std::cout << std::setfill(' ') << std::setw(5) << vol << " (" << volBinary << ")" << std::endl;
+  // Serial.printf("%d (%s)\n", vol, volBinary);
+  // Correct the printf so that it behaves like the std::cout with the proper spacing
+  Serial.printf("%5d (%s)\n", vol, volBinary);
+}

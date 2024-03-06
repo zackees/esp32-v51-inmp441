@@ -124,14 +124,14 @@ void i2s_audio_exit_light_sleep()
   
 }
 
-size_t i2s_read_dma_buffer(dma_buffer_t* dma_block) {
+size_t i2s_read_dma_buffer(dma_buffer_t* dma_block, uint32_t timeout) {
   size_t bytes_read = 0;
   esp_err_t err = i2s_channel_read(
     s_i2s_context.rx_chan,
     dma_block,
     sizeof(dma_buffer_t),
     &bytes_read,
-    0  // timeout - non blocking
+    timeout  // timeout - non blocking
   );
   uint32_t start = millis();
   if (err != ESP_OK)
@@ -148,7 +148,7 @@ size_t i2s_read_dma_buffer(dma_buffer_t* dma_block) {
   return bytes_read / sizeof(audio_sample_t);
 }
 
-size_t i2s_read_samples(audio_sample_t* begin, audio_sample_t* end)
+size_t i2s_read_samples(audio_sample_t* begin, audio_sample_t* end, uint32_t timeout)
 {
   size_t bytes_read = 0;
   size_t n_samples = 0;
@@ -161,7 +161,7 @@ size_t i2s_read_samples(audio_sample_t* begin, audio_sample_t* end)
       break;
     }
     dma_buffer_t* block = reinterpret_cast<dma_buffer_t*>(begin);
-    size_t new_samples = i2s_read_dma_buffer(block);
+    size_t new_samples = i2s_read_dma_buffer(block, timeout);
     n_samples += new_samples;
     if (new_samples != AUDIO_SAMPLES_PER_DMA_BUFFER)
     {

@@ -14,13 +14,13 @@ typedef audio_sample_t audio_buffer_t[512];
 
 void i2s_audio_init();
 void i2s_audio_shutdown();
-size_t i2s_read_samples(audio_sample_t* begin, audio_sample_t* end);
+size_t i2s_read_samples(audio_sample_t* begin, audio_sample_t* end, uint32_t timeout);
 
-inline size_t i2s_read_samples(audio_buffer_t buffer) {
+inline size_t i2s_read_samples(audio_buffer_t buffer, uint32_t timeout) {
   // Legacy api
   audio_sample_t* begin = &buffer[0];
   audio_sample_t* end = begin + sizeof(audio_buffer_t) / sizeof(*begin);
-  return i2s_read_samples(begin, end);
+  return i2s_read_samples(begin, end, timeout);
 }
 
 

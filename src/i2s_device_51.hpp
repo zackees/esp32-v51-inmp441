@@ -127,10 +127,11 @@ void i2s_audio_exit_light_sleep()
 size_t i2s_read_samples(audio_sample_t* begin, audio_sample_t* end)
 {
   size_t bytes_read = 0;
+  size_t n_write_buffer_bytes = (end - begin) * sizeof(audio_sample_t);
   esp_err_t err = i2s_channel_read(
     s_i2s_context.rx_chan,
     begin,
-    (end - begin) * sizeof(audio_sample_t),
+    n_write_buffer_bytes,
     &bytes_read,
     0  // timeout - non blocking
   );
@@ -144,33 +145,3 @@ size_t i2s_read_samples(audio_sample_t* begin, audio_sample_t* end)
   }
   return bytes_read / sizeof(audio_sample_t);
 }
-
-#if 0
-size_t i2s_read_samples(audio_sample_t* curr, audio_sample_t* end)
-{
-  // debug print last sample
-  audio_sample_t sample_on = s_dbg_last_sample[0];
-  Serial.printf("i2s_read_samples: last sample: %d\n", sample_on);
-  const audio_sample_t* start = curr;
-  while (curr < end) {
-    audio_sample_t dma_sample[AUDIO_SAMPLES_PER_DMA_BUFFER] = {0};
-    bool ok = xQueueReceive(s_audio_queue, dma_sample, 0);
-    if (!ok) {
-      break;
-    }
-    Serial.printf("i2s[0]=%d\n", dma_sample[0]);
-    const audio_sample_t* dma_begin = &dma_sample[0];
-    const audio_sample_t* dma_end = &dma_sample[AUDIO_SAMPLES_PER_DMA_BUFFER];
-    for (const audio_sample_t* dma_curr = dma_begin; dma_curr < dma_end; dma_curr++) {
-      if (curr < end) {
-        *curr = *dma_curr;
-        curr++;
-      } else {
-        Serial.println("i2s_read_samples: buffer overflow");
-        break;
-      }
-    }
-  }
-  return curr - start;
-}
-#endif

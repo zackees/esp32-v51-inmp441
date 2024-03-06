@@ -313,14 +313,14 @@ void test_i2s_isr_read_volume() {
 
 }
 
-#if 0
+#if 1
 void test_i2s_isr_and_light_sleep() {
   i2s_audio_init();
   while (true) {
-    uint32_t counter = i2s_get_dbg_counter();
     audio_buffer_t buffer = {0};
     audio_sample_t* begin = &buffer[0];
     audio_sample_t* end = begin + ARRAY_SIZE(buffer);
+    delay(1000);
     size_t n_samples = i2s_read_samples(begin, end);
     Serial.printf("read %d samples\n", n_samples);
     esp_err_t err = esp_sleep_enable_timer_wakeup(1 * 500);
@@ -335,8 +335,6 @@ void test_i2s_isr_and_light_sleep() {
     i2s_audio_exit_light_sleep();
     // invoke the distortion test
     test_microphone_distortion(1000);
-
-
     if (err != ESP_OK) {
       if (err == ESP_ERR_SLEEP_REJECT) {
         Serial.printf("Light sleep failed: rejected\n");
@@ -354,6 +352,6 @@ void loop()
 {
   //test_audio_and_i2s();
   //test_is2_and_psuedo();
-  //test_i2s_isr_and_light_sleep();
-  test_i2s_isr_read_volume();
+  test_i2s_isr_and_light_sleep();
+  //test_i2s_isr_read_volume();
 }

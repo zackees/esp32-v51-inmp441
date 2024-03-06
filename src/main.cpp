@@ -141,6 +141,7 @@ void test_microphone_distortion(uint32_t duration_ms = 50ul) {
 
       // Print out the information
       std::cout << std::setfill(' ') << std::setw(4) << diff << ":" << std::setw(5) << vol << " (" << volBinary << ")" << std::endl;
+      delay(10);
     }
   }
 }
